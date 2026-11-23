@@ -1,0 +1,198 @@
+{
+ "name": "valkey-swap-r1",
+ "defaults": {
+  "threads": 4,
+  "conns": 16,
+  "cpus": "4,5,10,11",
+  "warmup": 60,
+  "time": 120
+ },
+ "groups": [
+  {
+   "store": "valkey",
+   "swap": "none",
+   "data": {
+    "keys": 15000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "zipfian:0.99"
+    },
+    {
+     "key_dist": "hotspot:0.1:0.9"
+    },
+    {
+     "key_dist": "normal:0.5:0.05"
+    },
+    {
+     "key_dist": "uniform",
+     "rate": 50000
+    },
+    {
+     "key_dist": "zipfian:0.99",
+     "rate": 50000
+    }
+   ]
+  },
+  {
+   "store": "valkey",
+   "swap": "zram-lz4",
+   "data": {
+    "keys": 30000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "zipfian:0.99"
+    },
+    {
+     "key_dist": "hotspot:0.1:0.9"
+    },
+    {
+     "key_dist": "normal:0.5:0.05"
+    },
+    {
+     "key_dist": "uniform",
+     "rate": 50000
+    },
+    {
+     "key_dist": "zipfian:0.99",
+     "rate": 50000
+    }
+   ]
+  },
+  {
+   "store": "valkey",
+   "swap": "zram-zstd",
+   "data": {
+    "keys": 30000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "zipfian:0.99"
+    },
+    {
+     "key_dist": "hotspot:0.1:0.9"
+    },
+    {
+     "key_dist": "normal:0.5:0.05"
+    },
+    {
+     "key_dist": "uniform",
+     "rate": 50000
+    },
+    {
+     "key_dist": "zipfian:0.99",
+     "rate": 50000
+    }
+   ]
+  },
+  {
+   "store": "valkey",
+   "swap": "zswap-lz4",
+   "data": {
+    "keys": 30000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "zipfian:0.99"
+    },
+    {
+     "key_dist": "hotspot:0.1:0.9"
+    },
+    {
+     "key_dist": "normal:0.5:0.05"
+    },
+    {
+     "key_dist": "uniform",
+     "rate": 50000
+    },
+    {
+     "key_dist": "zipfian:0.99",
+     "rate": 50000
+    }
+   ]
+  },
+  {
+   "store": "valkey",
+   "swap": "zswap-zstd",
+   "data": {
+    "keys": 30000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "zipfian:0.99"
+    },
+    {
+     "key_dist": "hotspot:0.1:0.9"
+    },
+    {
+     "key_dist": "normal:0.5:0.05"
+    },
+    {
+     "key_dist": "uniform",
+     "rate": 50000
+    },
+    {
+     "key_dist": "zipfian:0.99",
+     "rate": 50000
+    }
+   ]
+  },
+  {
+   "store": "valkey",
+   "swap": "disk",
+   "data": {
+    "keys": 30000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "zipfian:0.99"
+    },
+    {
+     "key_dist": "hotspot:0.1:0.9"
+    },
+    {
+     "key_dist": "normal:0.5:0.05"
+    },
+    {
+     "key_dist": "uniform",
+     "rate": 50000
+    },
+    {
+     "key_dist": "zipfian:0.99",
+     "rate": 50000
+    }
+   ]
+  }
+ ]
+}
