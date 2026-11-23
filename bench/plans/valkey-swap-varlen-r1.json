@@ -5,7 +5,8 @@
   "conns": 16,
   "cpus": "4,5,10,11",
   "warmup": 60,
-  "time": 120
+  "time": 120,
+  "settle_max": 600
  },
  "groups": [
   {
@@ -192,7 +193,10 @@
      "key_dist": "zipfian:0.99",
      "rate": 50000
     }
-   ]
+   ],
+   "point_defaults": {
+    "settle_max": 1800
+   }
   }
  ]
 }

@@ -5,7 +5,8 @@
   "conns": 16,
   "cpus": "4,5,10,11",
   "warmup": 60,
-  "time": 120
+  "time": 120,
+  "settle_max": 600
  },
  "groups": [
   {
@@ -251,6 +252,9 @@
    "env": {
     "ZRAM_GB": 96,
     "SWAP_GB": 96
+   },
+   "point_defaults": {
+    "settle_max": 1800
    }
   }
  ]

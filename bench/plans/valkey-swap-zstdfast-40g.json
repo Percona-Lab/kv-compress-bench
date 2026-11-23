@@ -5,7 +5,8 @@
   "conns": 16,
   "cpus": "4,5,10,11",
   "warmup": 60,
-  "time": 120
+  "time": 120,
+  "settle_max": 600
  },
  "groups": [
   {

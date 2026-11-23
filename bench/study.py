@@ -60,9 +60,38 @@ def data_args(d):
     return a
 
 
+def settle(out, gi, pi, g, o):
+    """Drive the point's key distribution at full load in chunks until throughput is steady:
+    the last two chunks within settle_pct of each other, after at least 2 chunks, at most settle_max seconds.
+    Each distribution has its own hot set; after switching, the kernel needs time to bring it back into RAM."""
+    chunk, pct, mx = o.get("settle_chunk", 30), o.get("settle_pct", 2.0), o.get("settle_max", 600)
+    if mx <= 0:
+        return None
+    pid = sh(f"{KVCTL} pid", capture=True).strip()
+    hist = []
+    t0 = time.time()
+    while time.time() - t0 < mx:
+        r = subprocess.run(f"{KVB} run {data_args(g['data'])} --threads {o['threads']} --conns {o['conns']} --cpus {o['cpus']} "
+                           f"--server-pid {pid} --time {chunk} --warmup 0 --get-ratio {o.get('get_ratio', 0.9)} "
+                           f"--key-dist {o.get('key_dist', 'uniform')} --quiet", shell=True, text=True, capture_output=True)
+        try:
+            hist.append(json.loads(r.stdout)["ops_s"])
+        except Exception:
+            log(out, f"settle chunk failed: {r.stderr[-300:]}")
+            break
+        if len(hist) >= 2 and abs(hist[-1] - hist[-2]) <= pct / 100 * max(hist[-1], hist[-2]):
+            break
+    res = {"chunks_ops_s": [round(x) for x in hist], "seconds": round(time.time() - t0),
+           "steady": len(hist) >= 2 and abs(hist[-1] - hist[-2]) <= pct / 100 * max(hist[-1], hist[-2])}
+    log(out, f"settle g{gi} p{pi}: {res}")
+    return res
+
+
 def run_point(out, gi, pi, g, p, dflt):
     o = dict(dflt)
+    o.update(g.get("point_defaults", {}))
     o.update(p)
+    settled = settle(out, gi, pi, g, o)
     label = f"{g['store']}|{g['swap']}|{g['data']['keys']}|{o.get('key_dist','uniform')}|{'rate'+str(o['rate']) if o.get('rate') else 'closed'}"
     if o.get("tag"):
         label += "|" + o["tag"]
@@ -85,7 +114,7 @@ def run_point(out, gi, pi, g, p, dflt):
         summ = {"error": "no summary", "stderr": r.stderr[-4000:]}
     rec = {"type": "point", "study": out, "group": gi, "point": pi, "store": g["store"], "swap": g["swap"],
            "label": label, "ts": datetime.datetime.utcnow().isoformat(timespec="seconds") + "Z",
-           "host": host_state(), "exit": r.returncode, "summary": summ}
+           "host": host_state(), "exit": r.returncode, "settle": settled, "summary": summ}
     with open(os.path.join(out, "results.jsonl"), "a") as f:
         f.write(json.dumps(rec) + "\n")
     last = [l for l in r.stderr.splitlines() if l.startswith("SUMMARY") or l.startswith("WARNING")]
@@ -103,7 +132,8 @@ def main():
     out = a.out or f"/root/results/{plan['name']}"
     os.makedirs(out, exist_ok=True)
     sh(f"cp {a.plan} {out}/plan-{int(time.time())}.json")
-    dflt = {"threads": 4, "conns": 16, "cpus": "4,5,10,11", "warmup": 60, "time": 120}
+    dflt = {"threads": 4, "conns": 16, "cpus": "4,5,10,11", "warmup": 60, "time": 120,
+            "settle_chunk": 30, "settle_pct": 2.0, "settle_max": 600}
     dflt.update(plan.get("defaults", {}))
     only = set(int(x) for x in a.only.split(",")) if a.only else None
     for gi, g in enumerate(plan["groups"]):
