@@ -123,6 +123,10 @@ pub struct Sample {
     pub pswpin: u64,
     pub pswpout: u64,
     pub pgmajfault: u64,
+    pub zswpin: u64,
+    pub zswpout: u64,
+    pub zswpwb: u64,
+    pub server_majflt: Option<u64>,
     pub meminfo: Map<String, Value>,
     pub zram: Map<String, Value>,
     pub psi_mem_some_us: Option<u64>,
@@ -148,10 +152,19 @@ fn proc_cpu_s(pid: u32) -> Option<f64> {
     Some((ut + st) / clk_tck())
 }
 
+/// Major page faults of `pid` (all threads): for a swapping server each one is a page read back from swap
+/// (zram: decompressed; zswap: decompressed from the pool or read from disk; disk swap: read from disk).
+fn proc_majflt(pid: u32) -> Option<u64> {
+    let s = read(&format!("/proc/{pid}/stat"))?;
+    let after = &s[s.rfind(')')? + 2..];
+    after.split_whitespace().nth(9)?.parse().ok()
+}
+
 pub fn sample(t_ns: u64, server_pid: Option<u32>) -> Sample {
     let mut s = Sample { t_ns, client_cpu_s: client_cpu_s(), ..Default::default() };
     if let Some(pid) = server_pid {
         s.server_cpu_s = proc_cpu_s(pid);
+        s.server_majflt = proc_majflt(pid);
         if let Some(st) = read(&format!("/proc/{pid}/status")) {
             for l in st.lines() {
                 let kb = || l.split_whitespace().nth(1).and_then(|x| x.parse().ok());
@@ -182,6 +195,9 @@ pub fn sample(t_ns: u64, server_pid: Option<u32>) -> Sample {
                 (Some("pswpin"), Some(v)) => s.pswpin = v,
                 (Some("pswpout"), Some(v)) => s.pswpout = v,
                 (Some("pgmajfault"), Some(v)) => s.pgmajfault = v,
+                (Some("zswpin"), Some(v)) => s.zswpin = v,
+                (Some("zswpout"), Some(v)) => s.zswpout = v,
+                (Some("zswpwb"), Some(v)) => s.zswpwb = v,
                 _ => {}
             }
         }
@@ -263,6 +279,14 @@ pub fn delta(a: &Sample, b: &Sample) -> Map<String, Value> {
     m.insert("swapin_pages_s".into(), json!((b.pswpin - a.pswpin) as f64 / dt));
     m.insert("swapout_pages_s".into(), json!((b.pswpout - a.pswpout) as f64 / dt));
     m.insert("majfault_s".into(), json!((b.pgmajfault - a.pgmajfault) as f64 / dt));
+    // zswap loads/stores are not counted in pswpin/pswpout
+    m.insert("zswpin_s".into(), json!((b.zswpin - a.zswpin) as f64 / dt));
+    m.insert("zswpout_s".into(), json!((b.zswpout - a.zswpout) as f64 / dt));
+    m.insert("zswap_writeback_s".into(), json!((b.zswpwb - a.zswpwb) as f64 / dt));
+    if let (Some(x), Some(y)) = (a.server_majflt, b.server_majflt) {
+        m.insert("server_majflt_s".into(), json!((y - x) as f64 / dt));
+        m.insert("server_majflt_total".into(), json!(y - x));
+    }
     m.insert("disk_read_mb_s".into(), json!((b.disk_read_sectors - a.disk_read_sectors) as f64 * 512.0 / 1e6 / dt));
     m.insert("disk_write_mb_s".into(), json!((b.disk_write_sectors - a.disk_write_sectors) as f64 * 512.0 / 1e6 / dt));
     if let (Some(x), Some(y)) = (a.psi_mem_some_us, b.psi_mem_some_us) {

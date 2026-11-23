@@ -604,6 +604,10 @@ fn cmd_run(a: RunArgs) {
         cpu.insert("server_cpu_cores".into(), json!(c / secs));
         cpu.insert("server_cpu_us_per_op".into(), json!(c * 1e6 / ops.max(1.0)));
     }
+    if let Some(f) = sys.get("server_majflt_total").and_then(|v| v.as_f64()) {
+        // page reads from swap per operation (zram/zswap: decompressions)
+        cpu.insert("server_majflt_per_op".into(), json!(f / ops.max(1.0)));
+    }
     if let (Some(s0), Some(s1)) = (&info_meas_start, &info_meas_end) {
         let g = |m: &Map<String, Value>, k: &str| m.get(k).and_then(|v| v.as_f64());
         if let (Some(u0), Some(s0_), Some(u1), Some(s1_)) = (g(s0, "used_cpu_user"), g(s0, "used_cpu_sys"), g(s1, "used_cpu_user"), g(s1, "used_cpu_sys")) {
