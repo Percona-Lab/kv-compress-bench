@@ -4,8 +4,8 @@ set -euxo pipefail
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get -y install build-essential cmake pkg-config git curl jq python3 python3-pip libssl-dev libevent-dev \
-  autoconf automake libtool libpcre3-dev zlib1g-dev linux-tools-common linux-tools-$(uname -r) sysstat \
-  zstd lz4 numactl xfsprogs util-linux || true
+  autoconf automake libtool zlib1g-dev libpcre2-dev linux-tools-common linux-tools-$(uname -r) sysstat \
+  zstd lz4 numactl xfsprogs util-linux
 
 # second SSD -> /data (store data files, disk swap file)
 if ! mountpoint -q /data; then
@@ -18,7 +18,7 @@ if ! mountpoint -q /data; then
 fi
 
 # the image's default swap file is removed; swap is set per test mode by swapmode.sh
-swapoff -a || true
+swapoff -a
 sed -i '/swapfile/d' /etc/fstab
 rm -f /swapfile
 

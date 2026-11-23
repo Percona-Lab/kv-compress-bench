@@ -63,6 +63,7 @@ pub struct Shared {
     pub load_next: AtomicU64,
     pub load_chunk: u64,
     pub seed: u64,
+    pub spin_ns: u64,
 }
 
 pub struct Snapshot {
@@ -72,6 +73,8 @@ pub struct Snapshot {
     pub set_rt: Histogram<u64>,
     pub get_svc: Histogram<u64>,
     pub set_svc: Histogram<u64>,
+    /// open loop: how late requests were written relative to their schedule
+    pub send_lag: Histogram<u64>,
     pub misses: u64,
     pub errors: u64,
     pub verify_fail: u64,
@@ -88,6 +91,7 @@ impl Snapshot {
             set_rt: new_hist(),
             get_svc: new_hist(),
             set_svc: new_hist(),
+            send_lag: new_hist(),
             misses: 0,
             errors: 0,
             verify_fail: 0,
@@ -116,6 +120,8 @@ struct Conn {
     rpos: usize,
     inflight: VecDeque<Pending>,
     dirty: bool,
+    want_write: bool,
+    token: Token,
 }
 
 impl Conn {
@@ -245,6 +251,9 @@ impl<'a> Worker<'a> {
             };
             resp::encode_set(&mut c.wbuf, &self.sh.prefix, key, ver, &self.sh.vals);
         }
+        if self.sh.rate_per_thread.is_some() {
+            self.snap.send_lag.saturating_record(now.saturating_sub(intended).max(1));
+        }
         c.inflight.push_back(Pending { op, key, intended, sent: now });
         c.dirty = true;
         true
@@ -317,7 +326,7 @@ pub fn run_worker(sh: Arc<Shared>, tid: usize, cpu: Option<usize>, tx: Sender<Sn
         s.set_nonblocking(true).map_err(|e| e.to_string())?;
         let mut stream = TcpStream::from_std(s);
         poll.registry()
-            .register(&mut stream, Token(i), Interest::READABLE | Interest::WRITABLE)
+            .register(&mut stream, Token(i), Interest::READABLE)
             .map_err(|e| e.to_string())?;
         let fd = stream.as_raw_fd();
         conns.push(Conn {
@@ -329,6 +338,8 @@ pub fn run_worker(sh: Arc<Shared>, tid: usize, cpu: Option<usize>, tx: Sender<Sn
             rpos: 0,
             inflight: VecDeque::with_capacity(sh.depth.max(16)),
             dirty: false,
+            want_write: false,
+            token: Token(i),
         });
     }
     // timerfd for precise open-loop wake-ups
@@ -439,7 +450,13 @@ pub fn run_worker(sh: Arc<Shared>, tid: usize, cpu: Option<usize>, tx: Sender<Sn
         for c in w.conns.iter_mut() {
             if c.dirty {
                 c.flush().map_err(|e| format!("write: {e}"))?;
-                c.dirty = c.wpos < c.wbuf.len() && !c.wbuf.is_empty();
+                c.dirty = false;
+                let blocked = !c.wbuf.is_empty();
+                if blocked != c.want_write {
+                    let int = if blocked { Interest::READABLE | Interest::WRITABLE } else { Interest::READABLE };
+                    poll.registry().reregister(&mut c.stream, c.token, int).map_err(|e| e.to_string())?;
+                    c.want_write = blocked;
+                }
             }
         }
 
@@ -448,7 +465,7 @@ pub fn run_worker(sh: Arc<Shared>, tid: usize, cpu: Option<usize>, tx: Sender<Sn
             Some(std::time::Duration::from_millis(10))
         } else if open.is_some() {
             let wait = (t_next as u64).saturating_sub(now_ns());
-            if wait <= 30_000 {
+            if wait <= sh.spin_ns {
                 Some(std::time::Duration::ZERO)
             } else {
                 let target = t_next as u64;
@@ -483,6 +500,7 @@ pub fn run_worker(sh: Arc<Shared>, tid: usize, cpu: Option<usize>, tx: Sender<Sn
             if ev.is_writable() {
                 let c = &mut w.conns[ci];
                 c.flush().map_err(|e| format!("write: {e}"))?;
+                c.dirty = true; // re-evaluate write interest in the flush pass
             }
             if ev.is_readable() || ev.is_read_closed() {
                 let alive = w.conns[ci].fill().map_err(|e| format!("read: {e}"))?;

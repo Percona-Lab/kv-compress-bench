@@ -154,6 +154,10 @@ struct RunArgs {
     /// Warm-up seconds (run but not counted).
     #[arg(long, default_value_t = 10.0)]
     warmup: f64,
+    /// Open loop: busy-wait instead of sleeping when the next send is this close (microseconds).
+    /// Higher = sends closer to schedule, more client CPU.
+    #[arg(long, default_value_t = 15.0)]
+    spin_us: f64,
     /// Check every GET value against the expected content.
     #[arg(long)]
     verify: bool,
@@ -227,6 +231,7 @@ struct Agg {
     set_rt: Histogram<u64>,
     get_svc: Histogram<u64>,
     set_svc: Histogram<u64>,
+    send_lag: Histogram<u64>,
     misses: u64,
     errors: u64,
     verify_fail: u64,
@@ -235,13 +240,14 @@ struct Agg {
 
 impl Agg {
     fn new() -> Self {
-        Agg { get_rt: new_hist(), set_rt: new_hist(), get_svc: new_hist(), set_svc: new_hist(), misses: 0, errors: 0, verify_fail: 0, backlog: 0 }
+        Agg { get_rt: new_hist(), set_rt: new_hist(), get_svc: new_hist(), set_svc: new_hist(), send_lag: new_hist(), misses: 0, errors: 0, verify_fail: 0, backlog: 0 }
     }
     fn add(&mut self, s: &Snapshot) {
         self.get_rt.add(&s.get_rt).ok();
         self.set_rt.add(&s.set_rt).ok();
         self.get_svc.add(&s.get_svc).ok();
         self.set_svc.add(&s.set_svc).ok();
+        self.send_lag.add(&s.send_lag).ok();
         self.misses += s.misses;
         self.errors += s.errors;
         self.verify_fail += s.verify_fail;
@@ -252,6 +258,7 @@ impl Agg {
         self.set_rt.add(&s.set_rt).ok();
         self.get_svc.add(&s.get_svc).ok();
         self.set_svc.add(&s.set_svc).ok();
+        self.send_lag.add(&s.send_lag).ok();
         self.misses += s.misses;
         self.errors += s.errors;
         self.verify_fail += s.verify_fail;
@@ -377,6 +384,7 @@ fn base_shared(d: &DataArgs, c: &ConnArgs, vals: Arc<ValueGen>, mode: Mode) -> S
         load_next: AtomicU64::new(0),
         load_chunk: 4096,
         seed: d.seed,
+        spin_ns: 15_000,
     }
 }
 
@@ -464,13 +472,14 @@ fn cmd_run(a: RunArgs) {
     sh.dist = dist.clone();
     sh.scramble = if scramble_on { Some(Scramble::new(a.data.keys)) } else { None };
     sh.verify = a.verify;
+    sh.spin_ns = (a.spin_us * 1000.0) as u64;
     let config = json!({
         "label": a.conn.label, "data": data_json(&a.data, &vals),
         "get_ratio": a.get_ratio, "key_dist": dist.describe(), "scramble": scramble_on,
         "mode": if a.rate > 0.0 { "open" } else { "closed" }, "target_rate": a.rate,
         "arrival": if sh.poisson { "poisson" } else { "uniform" },
         "threads": a.conn.threads, "conns_per_thread": a.conn.conns, "pipeline": sh.depth,
-        "max_pending": sh.max_pending, "time_s": a.time, "warmup_s": a.warmup,
+        "max_pending": sh.max_pending, "spin_us": a.spin_us, "time_s": a.time, "warmup_s": a.warmup,
         "interval_s": a.conn.interval, "verify": a.verify, "cpus": a.conn.cpus,
         "server": format!("{}:{}", a.conn.host, a.conn.port), "server_pid": a.conn.server_pid,
     });
@@ -551,7 +560,7 @@ fn cmd_run(a: RunArgs) {
                 "ops_s": ops, "get_s": ag.get_rt.len() as f64 / a.conn.interval, "set_s": ag.set_rt.len() as f64 / a.conn.interval,
                 "p50_us": pct(&all, 0.5), "p99_us": pct(&all, 0.99), "p999_us": pct(&all, 0.999), "max_us": pct(&all, 1.0),
                 "get_p99_us": pct(&ag.get_rt, 0.99), "set_p99_us": pct(&ag.set_rt, 0.99),
-                "svc_p99_us": pct(&ag.all_svc(), 0.99),
+                "svc_p99_us": pct(&ag.all_svc(), 0.99), "send_lag_p99_us": pct(&ag.send_lag, 0.99),
                 "misses": ag.misses, "errors": ag.errors, "verify_fail": ag.verify_fail, "backlog": ag.backlog,
                 "sys": sys,
             });
@@ -587,6 +596,10 @@ fn cmd_run(a: RunArgs) {
         cpu.insert("client_cpu_cores".into(), json!(c / secs));
         cpu.insert("client_cpu_us_per_op".into(), json!(c * 1e6 / ops.max(1.0)));
     }
+    if let Some(c) = sys.get("client_cpu_s").and_then(|v| v.as_f64()) {
+        // the client is the bottleneck if its threads were >90% busy (closed loop only: open loop spins on purpose)
+        cpu.insert("client_saturated".into(), json!(a.rate <= 0.0 && c / secs > 0.9 * a.conn.threads as f64));
+    }
     if let Some(c) = sys.get("server_cpu_s").and_then(|v| v.as_f64()) {
         cpu.insert("server_cpu_cores".into(), json!(c / secs));
         cpu.insert("server_cpu_us_per_op".into(), json!(c * 1e6 / ops.max(1.0)));
@@ -608,6 +621,7 @@ fn cmd_run(a: RunArgs) {
         "latency": {
             "all": hist_json(&total.all_rt()), "get": hist_json(&total.get_rt), "set": hist_json(&total.set_rt),
             "service_all": hist_json(&total.all_svc()),
+            "send_lag": hist_json(&total.send_lag),
             "note": "latency = from scheduled send time (open loop) / actual send (closed loop); service = from actual send",
         },
         "misses": total.misses, "errors": total.errors, "verify_fail": total.verify_fail,
@@ -627,6 +641,9 @@ fn cmd_run(a: RunArgs) {
         cpu.get("server_cpu_us_per_op").or(cpu.get("server_info_cpu_us_per_op")).and_then(|v| v.as_f64()).map(|x| format!("{x:.2}")).unwrap_or("?".into()),
         if target > 0.0 { format!("  target {} met={}", target, rate_ok) } else { String::new() },
     );
+    if cpu.get("client_saturated").and_then(|v| v.as_bool()) == Some(true) {
+        eprintln!("WARNING: client threads were >90% busy: throughput may be limited by the client, add --threads/--cpus");
+    }
     if failed.is_some() || total.errors > 0 || total.verify_fail > 0 {
         std::process::exit(1);
     }

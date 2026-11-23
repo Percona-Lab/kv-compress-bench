@@ -4,7 +4,7 @@ set -euxo pipefail
 VALKEY=9.2.0
 KVROCKS=2.17.0
 LAVIK=0.3.2
-MEMTIER=2.1.4
+MEMTIER=2.6.1
 mkdir -p /opt/src && cd /opt/src
 
 # Valkey (source, default build options + jemalloc)
@@ -25,13 +25,13 @@ fi
 # memtier_benchmark (cross-check of kvbench numbers)
 if ! command -v memtier_benchmark >/dev/null; then
   curl -fsSL https://github.com/RedisLabs/memtier_benchmark/archive/refs/tags/$MEMTIER.tar.gz | tar xz
-  cd memtier_benchmark-$MEMTIER && autoreconf -ivf && ./configure && make -j"$(nproc)" && make install && cd ..
+  (cd memtier_benchmark-$MEMTIER && autoreconf -ivf && ./configure && make -j"$(nproc)" && make install)
 fi
 
 # Kvrocks (source; long build, fetches its own RocksDB etc.)
 if [ ! -x /opt/kvrocks-$KVROCKS/bin/kvrocks ]; then
   curl -fsSL https://github.com/apache/kvrocks/archive/refs/tags/v$KVROCKS.tar.gz | tar xz
-  cd kvrocks-$KVROCKS && ./x.py build -j"$(nproc)" build && mkdir -p /opt/kvrocks-$KVROCKS/bin && cp build/kvrocks /opt/kvrocks-$KVROCKS/bin/ && cd ..
+  (cd kvrocks-$KVROCKS && ./x.py build -j"$(nproc)" build && mkdir -p /opt/kvrocks-$KVROCKS/bin && cp build/kvrocks /opt/kvrocks-$KVROCKS/bin/)
 fi
 
 # Rust toolchain for kvbench
