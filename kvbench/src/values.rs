@@ -150,6 +150,12 @@ impl ValueGen {
     /// Estimate how well the values compress the way zram/zswap see them:
     /// values packed back-to-back into 4 KiB pages, each page compressed alone.
     pub fn measure_ratio(&self, nkeys: u64, pages: usize) -> serde_json::Value {
+        self.measure_ratio_ext(nkeys, pages, &[], None)
+    }
+
+    /// Like measure_ratio, plus zstd ratios at extra levels (negative = fast levels) and an optional
+    /// dump of the packed pages to a file (to test kernel compressors with exactly this data).
+    pub fn measure_ratio_ext(&self, nkeys: u64, pages: usize, zstd_levels: &[i32], dump: Option<&str>) -> serde_json::Value {
         let mut rng = Rng::new(42);
         let mut buf = Vec::with_capacity(pages * 4096 + self.max_len);
         let mut total_len = 0u64;
@@ -166,7 +172,17 @@ impl ValueGen {
             zstd1 += zstd::bulk::compress(p, 1).map(|c| c.len()).unwrap_or(4096).min(4096);
             zstd3 += zstd::bulk::compress(p, 3).map(|c| c.len()).unwrap_or(4096).min(4096);
         }
+        let mut extra = serde_json::Map::new();
+        for &lv in zstd_levels {
+            let c: usize = buf.chunks_exact(4096).take(pages)
+                .map(|p| zstd::bulk::compress(p, lv).map(|c| c.len()).unwrap_or(4096).min(4096)).sum();
+            extra.insert(format!("zstd{}_ratio", lv), serde_json::json!(raw as f64 / c as f64));
+        }
+        if let Some(path) = dump {
+            std::fs::write(path, &buf[..pages * 4096]).expect("write dump");
+        }
         serde_json::json!({
+            "zstd_levels": extra,
             "page_bytes": 4096,
             "pages": pages,
             "mean_value_len": total_len as f64 / count as f64,

@@ -33,7 +33,7 @@ enum Cmd {
     /// Run the GET/SET workload.
     Run(RunArgs),
     /// Print the compressibility of the generated values (no server needed).
-    Ratio(DataArgs),
+    Ratio(RatioArgs),
 }
 
 #[derive(Args, Clone)]
@@ -57,6 +57,21 @@ struct DataArgs {
     /// Seed for all generators.
     #[arg(long, default_value_t = 1)]
     seed: u64,
+}
+
+#[derive(Args)]
+struct RatioArgs {
+    #[command(flatten)]
+    data: DataArgs,
+    /// Extra zstd levels to report, comma separated (negative = fast levels), e.g. "-5,-1,1,3"
+    #[arg(long, default_value = "", allow_hyphen_values = true)]
+    zstd_levels: String,
+    /// Number of 4 KiB pages to sample.
+    #[arg(long, default_value_t = 2048)]
+    pages: usize,
+    /// Also write the sampled pages to this file.
+    #[arg(long)]
+    dump: Option<String>,
 }
 
 #[derive(Args, Clone)]
@@ -352,9 +367,11 @@ fn start_engine(sh: Shared, c: &ConnArgs) -> Engine {
 fn main() {
     let cli = Cli::parse();
     match cli.cmd {
-        Cmd::Ratio(d) => {
+        Cmd::Ratio(ra) => {
+            let d = ra.data;
             let vals = make_vals(&d);
-            let r = vals.measure_ratio(d.keys, 2048);
+            let lv: Vec<i32> = ra.zstd_levels.split(',').filter(|x| !x.trim().is_empty()).map(|x| x.trim().parse().expect("zstd level")).collect();
+            let r = vals.measure_ratio_ext(d.keys, ra.pages, &lv, ra.dump.as_deref());
             println!("{}", serde_json::to_string_pretty(&json!({"data": data_json(&d, &vals), "compressibility": r})).unwrap());
         }
         Cmd::Load(a) => cmd_load(a),
