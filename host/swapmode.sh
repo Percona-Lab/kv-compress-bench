@@ -2,7 +2,7 @@
 # Set the swap / compressed-memory mode for a test (same settings as Percona-Lab/zram-zswap-db-benchmark).
 #   swapmode.sh none | disk | zswap[-lz4|-zstd] | zram[-lz4|-zstd] | show
 #   none  - no swap at all
-#   disk  - 64 GB swap file on the second SSD (/data), zswap off, default reclaim sysctls, swappiness 60
+#   disk  - $SWAP_GB GB (default 64) swap file on the second SSD (/data), zswap off, default reclaim sysctls, swappiness 60
 #   zswap - zswap (zsmalloc, max_pool_percent $ZSWAP_POOL_PCT, default 50) in front of the same swap file, swappiness 100
 #   zram  - zram swap only ($ZRAM_GB GB device, default 64), zswap off, swappiness 180
 #   compressed modes also: vm.page-cluster 0, watermark_boost_factor 0, watermark_scale_factor 125 (Arch wiki values)
@@ -27,7 +27,11 @@ if [ "$base" = disk ] || [ "$base" = none ]; then
 else
   sysctl -q vm.page-cluster=0 vm.watermark_boost_factor=0 vm.watermark_scale_factor=125
 fi
-mkswapfile() { [ -e $SWF ] || { fallocate -l 64G $SWF; chmod 600 $SWF; mkswap -q $SWF; }; }
+SWAP_GB=${SWAP_GB:-64}
+mkswapfile() {
+  if [ -e $SWF ] && [ "$(stat -c %s $SWF)" != "$((SWAP_GB*1024*1024*1024))" ]; then rm -f $SWF; fi
+  [ -e $SWF ] || { fallocate -l ${SWAP_GB}G $SWF; chmod 600 $SWF; mkswap -q $SWF; }
+}
 case $base in
   none)  sysctl -q vm.swappiness=60 ;;
   disk)  sysctl -q vm.swappiness=60; mkswapfile; swapon $SWF ;;

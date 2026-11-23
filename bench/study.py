@@ -114,9 +114,9 @@ def main():
             continue
         sh(f"{KVCTL} stop")
         sh(f"{KVCTL} wipe {g['store']}")
-        sh(f"{SWAPMODE} {g['swap']}")
-        sh("sync; echo 3 > /proc/sys/vm/drop_caches")
         env = " ".join(f"{k}={v}" for k, v in g.get("env", {}).items())
+        sh(f"{env} {SWAPMODE} {g['swap']}")
+        sh("sync; echo 3 > /proc/sys/vm/drop_caches")
         sh(f"{env} {KVCTL} start {g['store']}")
         pid = sh(f"{KVCTL} pid", capture=True).strip()
         t0 = time.time()
