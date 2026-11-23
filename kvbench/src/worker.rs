@@ -62,6 +62,7 @@ pub struct Shared {
     pub interval_ns: u64,
     pub load_next: AtomicU64,
     pub load_chunk: u64,
+    /// request-stream seed (load: the data seed)
     pub seed: u64,
     pub spin_ns: u64,
 }
@@ -246,7 +247,7 @@ impl<'a> Worker<'a> {
                 Mode::Load => 0,
                 Mode::Run => {
                     self.ver_counter += 1;
-                    ((self.tid as u64 + 1) << 40) | (self.sh.seed & 0xFF) << 32 | (self.ver_counter & 0xFFFF_FFFF)
+                    ((self.tid as u64 + 1) << 40) | (self.sh.seed & 0xFF) << 32 /* differs between runs: SET versions stay unique */ | (self.ver_counter & 0xFFFF_FFFF)
                 }
             };
             resp::encode_set(&mut c.wbuf, &self.sh.prefix, key, ver, &self.sh.vals);

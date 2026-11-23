@@ -173,6 +173,10 @@ struct RunArgs {
     /// Higher = sends closer to schedule, more client CPU.
     #[arg(long, default_value_t = 15.0)]
     spin_us: f64,
+    /// Seed for the request stream (keys, GET/SET choice, arrivals). 0 = random per run (recorded in the
+    /// output). Values do not depend on it, so runs with different stream seeds share the same data.
+    #[arg(long, default_value_t = 0)]
+    stream_seed: u64,
     /// Check every GET value against the expected content.
     #[arg(long)]
     verify: bool,
@@ -490,13 +494,17 @@ fn cmd_run(a: RunArgs) {
     sh.scramble = if scramble_on { Some(Scramble::new(a.data.keys)) } else { None };
     sh.verify = a.verify;
     sh.spin_ns = (a.spin_us * 1000.0) as u64;
+    let stream_seed = if a.stream_seed != 0 { a.stream_seed } else {
+        dist::mix64(now_ns() ^ ((std::process::id() as u64) << 32)) | 1
+    };
+    sh.seed = stream_seed;
     let config = json!({
         "label": a.conn.label, "data": data_json(&a.data, &vals),
         "get_ratio": a.get_ratio, "key_dist": dist.describe(), "scramble": scramble_on,
         "mode": if a.rate > 0.0 { "open" } else { "closed" }, "target_rate": a.rate,
         "arrival": if sh.poisson { "poisson" } else { "uniform" },
         "threads": a.conn.threads, "conns_per_thread": a.conn.conns, "pipeline": sh.depth,
-        "max_pending": sh.max_pending, "spin_us": a.spin_us, "time_s": a.time, "warmup_s": a.warmup,
+        "max_pending": sh.max_pending, "spin_us": a.spin_us, "stream_seed": stream_seed, "time_s": a.time, "warmup_s": a.warmup,
         "interval_s": a.conn.interval, "verify": a.verify, "cpus": a.conn.cpus,
         "server": format!("{}:{}", a.conn.host, a.conn.port), "server_pid": a.conn.server_pid,
     });
