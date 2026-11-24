@@ -43,7 +43,7 @@ def host_state():
     st = {
         "kernel": os.uname().release,
         "swap": sh("swapon --noheadings --show=NAME,SIZE,USED,PRIO", capture=True).strip(),
-        "zswap": {k: rd(f"/sys/module/zswap/parameters/{k}") for k in ("enabled", "compressor", "max_pool_percent", "zpool")},
+        "zswap": {k: rd(f"/sys/module/zswap/parameters/{k}") for k in ("enabled", "compressor", "max_pool_percent", "zpool", "shrinker_enabled", "accept_threshold_percent")},
         "zram_algo": rd("/sys/block/zram0/comp_algorithm"),
         "zram_disksize": rd("/sys/block/zram0/disksize"),
         "sysctl": {k: rd(f"/proc/sys/vm/{k}") for k in ("swappiness", "page-cluster", "watermark_boost_factor", "watermark_scale_factor", "overcommit_memory")},

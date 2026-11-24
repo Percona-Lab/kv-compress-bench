@@ -13,7 +13,7 @@ mode=${1:?mode}; base=${mode%%-*}; comp=${mode#*-}; [ "$comp" = "$mode" ] && com
 
 show() {
   echo "swap: $(swapon --noheadings --show=NAME,SIZE | tr '\n' ' ')"
-  echo "zswap: enabled=$(cat /sys/module/zswap/parameters/enabled) compressor=$(cat /sys/module/zswap/parameters/compressor) max_pool_percent=$(cat /sys/module/zswap/parameters/max_pool_percent)"
+  echo "zswap: enabled=$(cat /sys/module/zswap/parameters/enabled) compressor=$(cat /sys/module/zswap/parameters/compressor) max_pool_percent=$(cat /sys/module/zswap/parameters/max_pool_percent) shrinker=$(cat /sys/module/zswap/parameters/shrinker_enabled)"
   [ -e /sys/block/zram0/comp_algorithm ] && echo "zram0: $(grep -o '\[[a-z0-9-]*\]' /sys/block/zram0/comp_algorithm) disksize=$(cat /sys/block/zram0/disksize)"
   echo "sysctl: swappiness=$(sysctl -n vm.swappiness) page-cluster=$(sysctl -n vm.page-cluster) watermark_boost_factor=$(sysctl -n vm.watermark_boost_factor) watermark_scale_factor=$(sysctl -n vm.watermark_scale_factor)"
 }
@@ -42,6 +42,7 @@ case $base in
          echo $comp > /sys/module/zswap/parameters/compressor
          echo zsmalloc > /sys/module/zswap/parameters/zpool 2>/dev/null || true   # zsmalloc is the only zpool on new kernels
          echo ${ZSWAP_POOL_PCT:-50} > /sys/module/zswap/parameters/max_pool_percent
+         echo ${ZSWAP_SHRINKER:-Y} > /sys/module/zswap/parameters/shrinker_enabled   # Y = kernel default (writes cold pages back to disk)
          echo Y > /sys/module/zswap/parameters/enabled
          swapon $SWF ;;
   zram)  sysctl -q vm.swappiness=180; modprobe zram num_devices=1
