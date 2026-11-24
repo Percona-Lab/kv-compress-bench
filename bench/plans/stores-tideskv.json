@@ -1,0 +1,158 @@
+{
+ "name": "stores-tideskv",
+ "defaults": {
+  "threads": 4,
+  "conns": 16,
+  "cpus": "4,5,10,11",
+  "warmup": 60,
+  "time": 120
+ },
+ "groups": [
+  {
+   "name": "tideskv",
+   "store": "tideskv",
+   "swap": "none",
+   "data": {
+    "keys": 30000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10
+   },
+   "point_defaults": {
+    "settle_max": 1800
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "zipfian:0.99"
+    },
+    {
+     "key_dist": "hotspot:0.1:0.9"
+    },
+    {
+     "key_dist": "normal:0.5:0.05"
+    },
+    {
+     "key_dist": "uniform",
+     "rate": 50000
+    },
+    {
+     "key_dist": "zipfian:0.99",
+     "rate": 50000
+    }
+   ]
+  },
+  {
+   "name": "tideskv-zstd",
+   "store": "tideskv",
+   "swap": "none",
+   "data": {
+    "keys": 30000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10
+   },
+   "point_defaults": {
+    "settle_max": 1800
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "zipfian:0.99"
+    },
+    {
+     "key_dist": "hotspot:0.1:0.9"
+    },
+    {
+     "key_dist": "normal:0.5:0.05"
+    },
+    {
+     "key_dist": "uniform",
+     "rate": 50000
+    },
+    {
+     "key_dist": "zipfian:0.99",
+     "rate": 50000
+    }
+   ],
+   "env": {
+    "TIDESKV_OPTS": "compression=zstd"
+   }
+  },
+  {
+   "name": "tideskv",
+   "store": "tideskv",
+   "swap": "none",
+   "data": {
+    "keys": 48000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10
+   },
+   "point_defaults": {
+    "settle_max": 1800
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "zipfian:0.99"
+    },
+    {
+     "key_dist": "hotspot:0.1:0.9"
+    },
+    {
+     "key_dist": "normal:0.5:0.05"
+    },
+    {
+     "key_dist": "uniform",
+     "rate": 50000
+    },
+    {
+     "key_dist": "zipfian:0.99",
+     "rate": 50000
+    }
+   ]
+  },
+  {
+   "name": "tideskv-zstd",
+   "store": "tideskv",
+   "swap": "none",
+   "data": {
+    "keys": 48000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10
+   },
+   "point_defaults": {
+    "settle_max": 1800
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "zipfian:0.99"
+    },
+    {
+     "key_dist": "hotspot:0.1:0.9"
+    },
+    {
+     "key_dist": "normal:0.5:0.05"
+    },
+    {
+     "key_dist": "uniform",
+     "rate": 50000
+    },
+    {
+     "key_dist": "zipfian:0.99",
+     "rate": 50000
+    }
+   ],
+   "env": {
+    "TIDESKV_OPTS": "compression=zstd"
+   }
+  }
+ ]
+}

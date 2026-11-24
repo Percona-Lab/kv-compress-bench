@@ -1,5 +1,6 @@
 //! kvbench: low-overhead benchmark for Redis-compatible key-value stores.
 
+mod codec;
 mod dist;
 mod metrics;
 mod resp;
@@ -57,6 +58,10 @@ struct DataArgs {
     /// Seed for all generators.
     #[arg(long, default_value_t = 1)]
     seed: u64,
+    /// Compress each value in the client before SET and decompress after GET: none | lz4 | zstd | zstd:LEVEL.
+    /// Use the same setting for load and run.
+    #[arg(long, default_value = "none", allow_hyphen_values = true)]
+    client_compress: String,
 }
 
 #[derive(Args)]
@@ -337,6 +342,7 @@ fn data_json(d: &DataArgs, vals: &ValueGen) -> Value {
     json!({
         "keys": d.keys, "key_prefix": d.key_prefix, "value_size": vals.size.describe(),
         "value_random_pct": d.value_random_pct, "pool_mb": d.pool_mb, "seed": d.seed,
+        "client_compress": codec::describe(codec::parse(&d.client_compress).unwrap_or(None)),
     })
 }
 
@@ -375,7 +381,18 @@ fn main() {
             let d = ra.data;
             let vals = make_vals(&d);
             let lv: Vec<i32> = ra.zstd_levels.split(',').filter(|x| !x.trim().is_empty()).map(|x| x.trim().parse().expect("zstd level")).collect();
-            let r = vals.measure_ratio_ext(d.keys, ra.pages, &lv, ra.dump.as_deref());
+            let mut r = vals.measure_ratio_ext(d.keys, ra.pages, &lv, ra.dump.as_deref());
+            if let Some(k) = codec::parse(&d.client_compress).unwrap_or_else(|e| die(&e)) {
+                // each value compressed on its own, as --client-compress does
+                let mut cd = codec::Codec::new(k, vals.size.max());
+                let mut rng = dist::Rng::new(7);
+                for _ in 0..20000 {
+                    cd.raw.clear();
+                    vals.write(rng.below(d.keys.max(1)), 0, &mut cd.raw);
+                    cd.compress();
+                }
+                r["client_compress"] = json!({"codec": codec::describe(Some(k)), "per_value_ratio": cd.raw_bytes as f64 / cd.comp_bytes.max(1) as f64});
+            }
             println!("{}", serde_json::to_string_pretty(&json!({"data": data_json(&d, &vals), "compressibility": r})).unwrap());
         }
         Cmd::Load(a) => cmd_load(a),
@@ -399,6 +416,7 @@ fn base_shared(d: &DataArgs, c: &ConnArgs, vals: Arc<ValueGen>, mode: Mode) -> S
         prefix: d.key_prefix.as_bytes().to_vec(),
         vals,
         verify: false,
+        client_compress: codec::parse(&d.client_compress).unwrap_or_else(|e| die(&e)),
         stop: AtomicBool::new(false),
         start_ns: AtomicU64::new(0),
         interval_ns: (c.interval * 1e9) as u64,
@@ -425,6 +443,7 @@ fn cmd_load(a: LoadArgs) {
     let s0 = metrics::sample(t0, a.conn.server_pid);
     eng.sh.start_ns.store(t0, Ordering::Release);
     let mut finals = 0;
+    let (mut vraw, mut vcomp) = (0u64, 0u64);
     let mut per_idx: BTreeMap<u64, (usize, Agg)> = BTreeMap::new();
     let mut done = 0u64;
     let mut total = Agg::new();
@@ -436,6 +455,8 @@ fn cmd_load(a: LoadArgs) {
         };
         if s.final_ {
             finals += 1;
+            vraw += s.value_raw_bytes;
+            vcomp += s.value_comp_bytes;
         }
         total.add(&s);
         let e = per_idx.entry(s.idx).or_insert((0, Agg::new()));
@@ -464,6 +485,7 @@ fn cmd_load(a: LoadArgs) {
         "type": "load_summary", "label": a.conn.label,
         "data": data_json(&a.data, &vals), "compressibility": ratio,
         "keys_loaded": total.ops(), "errors": total.errors, "seconds": secs,
+        "client_compress": if vraw > 0 { json!({"value_bytes": vraw, "sent_bytes": vcomp, "ratio": vraw as f64 / vcomp.max(1) as f64}) } else { Value::Null },
         "keys_per_s": total.ops() as f64 / secs,
         "dbsize": dbsize, "server_info": inf, "system": metrics::delta(&s0, &s1),
     });
@@ -528,6 +550,7 @@ fn cmd_run(a: RunArgs) {
     let mut total = Agg::new();
     let mut warm = Agg::new();
     let mut finals = 0;
+    let (mut vraw, mut vcomp) = (0u64, 0u64);
     let mut info_meas_start: Option<Map<String, Value>> = if n_warm == 0 { Some(info0.clone()) } else { None };
     let mut info_meas_end: Option<Map<String, Value>> = None;
     let mut next_sample = t0 + iv;
@@ -559,6 +582,8 @@ fn cmd_run(a: RunArgs) {
         };
         if s.final_ {
             finals += 1;
+            vraw += s.value_raw_bytes;
+            vcomp += s.value_comp_bytes;
             continue; // drain after stop: not counted
         }
         let e = per_idx.entry(s.idx).or_insert((0, Agg::new()));
@@ -655,6 +680,7 @@ fn cmd_run(a: RunArgs) {
         },
         "misses": total.misses, "errors": total.errors, "verify_fail": total.verify_fail,
         "final_backlog": total.backlog,
+        "client_compress": if vraw > 0 { json!({"value_bytes": vraw, "sent_bytes": vcomp, "ratio": vraw as f64 / vcomp.max(1) as f64}) } else { Value::Null },
         "cpu": cpu, "system": sys,
         "server_info_start": info_meas_start, "server_info_end": info_meas_end,
         "warmup": { "ops_s": warm.ops() as f64 / (n_warm as f64 * a.conn.interval).max(1e-9), "p99_us": pct(&warm.all_rt(), 0.99) },

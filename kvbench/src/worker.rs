@@ -8,6 +8,7 @@
 //! omission). Service time (from the moment the request is written) is kept as
 //! a separate histogram.
 
+use crate::codec::{Codec, Kind};
 use crate::dist::{KeyDist, Rng, Scramble};
 use crate::resp::{self, Reply};
 use crate::values::ValueGen;
@@ -57,6 +58,8 @@ pub struct Shared {
     pub prefix: Vec<u8>,
     pub vals: Arc<ValueGen>,
     pub verify: bool,
+    /// compress values in the client before SET, decompress after GET
+    pub client_compress: Option<Kind>,
     pub stop: AtomicBool,
     pub start_ns: AtomicU64,
     pub interval_ns: u64,
@@ -81,6 +84,9 @@ pub struct Snapshot {
     pub verify_fail: u64,
     pub backlog: u64,
     pub final_: bool,
+    /// client compression: value bytes before / after compression (SETs), sent with the final snapshot
+    pub value_raw_bytes: u64,
+    pub value_comp_bytes: u64,
 }
 
 impl Snapshot {
@@ -98,6 +104,8 @@ impl Snapshot {
             verify_fail: 0,
             backlog: 0,
             final_: false,
+            value_raw_bytes: 0,
+            value_comp_bytes: 0,
         }
     }
 }
@@ -198,6 +206,7 @@ struct Worker<'a> {
     load_cur: u64,
     load_end: u64,
     errors_printed: u32,
+    codec: Option<Codec>,
 }
 
 impl<'a> Worker<'a> {
@@ -250,7 +259,14 @@ impl<'a> Worker<'a> {
                     ((self.tid as u64 + 1) << 40) | (self.sh.seed & 0xFF) << 32 /* differs between runs: SET versions stay unique */ | (self.ver_counter & 0xFFFF_FFFF)
                 }
             };
-            resp::encode_set(&mut c.wbuf, &self.sh.prefix, key, ver, &self.sh.vals);
+            if let Some(cd) = self.codec.as_mut() {
+                cd.raw.clear();
+                self.sh.vals.write(key, ver, &mut cd.raw);
+                cd.compress();
+                resp::encode_set_bytes(&mut c.wbuf, &self.sh.prefix, key, &cd.out);
+            } else {
+                resp::encode_set(&mut c.wbuf, &self.sh.prefix, key, ver, &self.sh.vals);
+            }
         }
         if self.sh.rate_per_thread.is_some() {
             self.snap.send_lag.saturating_record(now.saturating_sub(intended).max(1));
@@ -278,7 +294,14 @@ impl<'a> Worker<'a> {
             let svc = now.saturating_sub(p.sent).max(1);
             match (p.op, reply) {
                 (OP_GET, Reply::Bulk(s, l)) => {
-                    if self.sh.verify && !self.sh.vals.verify(p.key, &c.rbuf[s..s + l]) {
+                    if let Some(cd) = self.codec.as_mut() {
+                        // decompress every value (that is the client's cost), check it if asked
+                        if !cd.decompress(&c.rbuf[s..s + l]) {
+                            self.snap.verify_fail += 1;
+                        } else if self.sh.verify && !self.sh.vals.verify(p.key, &cd.raw) {
+                            self.snap.verify_fail += 1;
+                        }
+                    } else if self.sh.verify && !self.sh.vals.verify(p.key, &c.rbuf[s..s + l]) {
                         self.snap.verify_fail += 1;
                     }
                 }
@@ -370,6 +393,7 @@ pub fn run_worker(sh: Arc<Shared>, tid: usize, cpu: Option<usize>, tx: Sender<Sn
         load_cur: 0,
         load_end: 0,
         errors_printed: 0,
+        codec: sh.client_compress.map(|k| Codec::new(k, sh.vals.size.max())),
     };
     let nconns = w.conns.len();
     let open = sh.rate_per_thread;
@@ -525,6 +549,10 @@ pub fn run_worker(sh: Arc<Shared>, tid: usize, cpu: Option<usize>, tx: Sender<Sn
     s.idx = idx;
     s.backlog = backlog.len() as u64;
     s.final_ = true;
+    if let Some(cd) = w.codec.as_ref() {
+        s.value_raw_bytes = cd.raw_bytes;
+        s.value_comp_bytes = cd.comp_bytes;
+    }
     tx.send(s).ok();
     unsafe { libc::close(tfd) };
     Ok(())

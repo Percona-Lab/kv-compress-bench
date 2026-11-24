@@ -37,6 +37,16 @@ pub fn encode_set(out: &mut Vec<u8>, prefix: &[u8], key: u64, ver: u64, vals: &V
     len
 }
 
+/// SET with a value that is already prepared (e.g. compressed by the client).
+#[inline]
+pub fn encode_set_bytes(out: &mut Vec<u8>, prefix: &[u8], key: u64, val: &[u8]) {
+    out.extend_from_slice(b"*3\r\n$3\r\nSET\r\n");
+    push_key(out, prefix, key);
+    push_len(out, b'$', val.len());
+    out.extend_from_slice(val);
+    out.extend_from_slice(b"\r\n");
+}
+
 pub fn encode_cmd(out: &mut Vec<u8>, args: &[&[u8]]) {
     push_len(out, b'*', args.len());
     for a in args {

@@ -55,6 +55,8 @@ def host_state():
 
 def data_args(d):
     a = f"--keys {d['keys']} --value-size {d.get('value_size', 'fixed:1024')} --value-random-pct {d.get('value_random_pct', 100)}"
+    if d.get("client_compress"):
+        a += f" --client-compress={d['client_compress']}"
     if d.get("key_prefix"):
         a += f" --key-prefix {d['key_prefix']}"
     return a

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Start / stop one store at a time on 127.0.0.1:6379 as the systemd unit kvbsrv.
-#   kvctl.sh start valkey|valkey-io|kvrocks|lavik   kvctl.sh stop   kvctl.sh pid   kvctl.sh wipe <store>
+#   kvctl.sh start valkey|valkey-io|kvrocks|tideskv|lavik   kvctl.sh stop   kvctl.sh pid   kvctl.sh wipe <store>
 # CPU layout (E-2286G, cpu N and N+6 are SMT siblings): OS 0,6 | server 1-3,7-9 | client 4,5,10,11
 # Every non-default setting is listed here (and copied into results by run scripts).
 set -euo pipefail
@@ -8,6 +8,7 @@ SRV_CPUS=${SRV_CPUS:-1,2,3,7,8,9}
 VALKEY=/opt/valkey-9.2.0/bin/valkey-server
 KVROCKS=/opt/kvrocks-2.17.0/bin/kvrocks
 LAVIK=/opt/lavik-0.3.2/lavik
+TIDESKV=/opt/tideskv/bin/tideskv-server
 LAVIK_GB=${LAVIK_GB:-300}
 cmd=${1:?}; store=${2:-}
 
@@ -45,6 +46,14 @@ case $cmd in
         for kv in ${KVROCKS_OPTS:-}; do set_conf "${kv%%=*}" "${kv#*=}"; done
         grep -E "^(bind|port|dir|workers|rocksdb\.(compression|block_cache_size|compression_start_level))" /data/kvrocks.conf
         unit_run $KVROCKS -c /data/kvrocks.conf ;;
+      tideskv)
+        # TidesKV defaults (compression lz4, 4 GB block cache, sync-mode interval = fsync once a second) with only
+        # bind/port/dir/workers changed, plus TIDESKV_OPTS="key=value ..." overrides
+        mkdir -p /data/tideskv
+        { echo "bind 127.0.0.1"; echo "port 6379"; echo "dir /data/tideskv"; echo "workers ${TIDESKV_WORKERS:-6}"
+          for kv in ${TIDESKV_OPTS:-}; do echo "${kv%%=*} ${kv#*=}"; done; } > /data/tideskv.conf
+        cat /data/tideskv.conf
+        unit_run $TIDESKV /data/tideskv.conf ;;
       lavik)
         mkdir -p /data/lavik/logs
         [ -e /data/lavik/data ] || fallocate -l ${LAVIK_GB}G /data/lavik/data
@@ -60,6 +69,6 @@ case $cmd in
   pid) systemctl show -p MainPID --value kvbsrv ;;
   wipe)
     systemctl is-active -q kvbsrv && { echo "stop first" >&2; exit 1; }
-    case $store in valkey|valkey-io) rm -rf /data/valkey ;; kvrocks) rm -rf /data/kvrocks ;; lavik) rm -rf /data/lavik ;; esac ;;
+    case $store in valkey|valkey-io) rm -rf /data/valkey ;; kvrocks) rm -rf /data/kvrocks ;; tideskv) rm -rf /data/tideskv ;; lavik) rm -rf /data/lavik ;; esac ;;
   *) echo "usage" >&2; exit 2 ;;
 esac
