@@ -14,3 +14,6 @@ history, kvbench summary), `intervals.jsonl` (per-second lines), `loads.jsonl`, 
 | `valkey-swap-varlen-r1` | values uniform 0-2000 B, 30M keys (34.6 GB) | yes |
 | `valkey-swap-varlen-35m` | values uniform 0-2000 B, 35M keys (~40 GB, matches r2 memory) | yes |
 | `aborted-*` | stopped runs (before the fixes) | no |
+
+Note on `stores-r1` (2026-11-24): the 40 GB `kvrocks-lz4`, `kvrocks-zstd` and `lavik` groups overlapped builds,
+smoke tests and screenshots run on the benchmark host; they are superseded by `stores-r1-rerun40`.
