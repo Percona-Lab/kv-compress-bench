@@ -37,7 +37,7 @@ mkswapfile() {
 case $base in
   none)  sysctl -q vm.swappiness=60 ;;
   disk)  sysctl -q vm.swappiness=60; mkswapfile; swapon $SWF ;;
-  zswap) [[ $comp =~ [0-9] ]] && { echo "zswap cannot set a zstd level" >&2; exit 2; }
+  zswap) [[ $comp =~ ^zstd-?[0-9]+$ ]] && { echo "zswap cannot set a zstd level" >&2; exit 2; }
          sysctl -q vm.swappiness=100; mkswapfile
          echo $comp > /sys/module/zswap/parameters/compressor
          echo zsmalloc > /sys/module/zswap/parameters/zpool 2>/dev/null || true   # zsmalloc is the only zpool on new kernels
