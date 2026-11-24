@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Valkey Beyond RAM</title>
+<meta name="description" content="Valkey with more data than RAM: zram, zswap and disk swap, lz4 and zstd, measured with kvbench.">
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --surface-2: #f3f2ef;
+  --ink: #0b0b0b; --ink-2: #52514e; --muted: #6f6d68;
+  --grid: #e1e0d9; --axis: #c3c2b7; --ring: rgba(11,11,11,0.10);
+  --ram: #898781; --zram: #2a78d6; --zswap: #eb6834; --disk: #1baf7a; --store: #2a78d6;
+  --warn-bg: #fff6e0; --warn-ink: #5a4100; --accent: #256abf;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --surface-2: #232321;
+    --ink: #f0efec; --ink-2: #c3c2b7; --muted: #9a988f;
+    --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10);
+    --ram: #898781; --zram: #3987e5; --zswap: #d95926; --disk: #199e70; --store: #3987e5;
+    --warn-bg: #2b2414; --warn-ink: #f3d79b; --accent: #6da7ec;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --surface-2: #232321;
+  --ink: #f0efec; --ink-2: #c3c2b7; --muted: #9a988f;
+  --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10);
+  --ram: #898781; --zram: #3987e5; --zswap: #d95926; --disk: #199e70; --store: #3987e5;
+  --warn-bg: #2b2414; --warn-ink: #f3d79b; --accent: #6da7ec;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+a { color: var(--accent); }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 32px 16px 64px; }
+header h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 8px; letter-spacing: -0.01em; }
+header p.lede { color: var(--ink-2); margin: 0 0 16px; max-width: 760px; }
+.disclosure { background: var(--warn-bg); color: var(--warn-ink); border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; margin: 16px 0 24px; }
+h2 { font-size: 1.35rem; margin: 40px 0 12px; }
+h3 { font-size: 1.05rem; margin: 24px 0 8px; }
+p, li { max-width: 780px; }
+.card { background: var(--surface); border: 1px solid var(--ring); border-radius: 12px; padding: 20px; margin: 16px 0; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin: 8px 0 8px; }
+.tile { background: var(--surface); border: 1px solid var(--ring); border-radius: 12px; padding: 16px; }
+.tile .num { font-size: 2rem; font-weight: 650; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.tile .lbl { color: var(--ink-2); font-size: 0.88rem; margin-top: 6px; }
+.controls { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: end; margin-bottom: 16px; }
+.controls label { display: flex; flex-direction: column; gap: 4px; font-size: 0.8rem; color: var(--ink-2); }
+select { font: inherit; font-size: 0.92rem; color: var(--ink); background: var(--surface-2); border: 1px solid var(--ring); border-radius: 8px; padding: 6px 10px; min-width: 180px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.85rem; color: var(--ink-2); margin: 4px 0 12px; }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; background: var(--c); }
+.chart-title { font-weight: 600; margin: 0 0 2px; }
+.chart-sub { color: var(--ink-2); font-size: 0.88rem; margin: 0 0 12px; }
+.bars { display: grid; grid-template-columns: minmax(130px, 220px) 1fr; gap: 6px 12px; align-items: center; }
+.bars .name { font-size: 0.88rem; color: var(--ink); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bars .track { position: relative; height: 22px; border-left: 1px solid var(--axis); }
+.bars .bar { position: absolute; left: 0; top: 3px; height: 16px; border-radius: 0 4px 4px 0; background: var(--c); }
+.bars .row:hover .bar, .bars .track:focus .bar { filter: brightness(1.12); outline: 2px solid var(--ring); }
+.bars .val { position: absolute; top: 1px; font-size: 0.82rem; color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bars .track:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+.bars .clip { position: absolute; top: 0; width: 6px; height: 22px; background: repeating-linear-gradient(135deg, var(--surface) 0 2px, transparent 2px 4px); }
+.gridlines { position: absolute; inset: 0; pointer-events: none; }
+.gridlines i { position: absolute; top: 0; bottom: 0; border-left: 1px solid var(--grid); }
+.axis { display: grid; grid-template-columns: minmax(130px, 220px) 1fr; gap: 0 12px; }
+.axis .ticks { position: relative; height: 18px; font-size: 0.75rem; color: var(--muted); }
+.axis .ticks span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.axis .ticks span:last-child { transform: translateX(-100%); }
+.axis .ticks span:first-child { transform: none; }
+.tip { position: fixed; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--ring); box-shadow: 0 4px 16px rgba(0,0,0,0.12); border-radius: 8px; padding: 8px 10px; font-size: 0.82rem; max-width: 300px; z-index: 10; display: none; }
+.tip b { font-size: 0.95rem; }
+.tip .k { color: var(--ink-2); }
+.toggle { margin-top: 12px; font-size: 0.85rem; }
+button.link { font: inherit; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; }
+table { border-collapse: collapse; width: 100%; font-size: 0.86rem; font-variant-numeric: tabular-nums; }
+th, td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+th:first-child, td:first-child, th.l, td.l, table.t2 td:nth-child(2), table.t2 th:nth-child(2) { text-align: left; }
+td.l { white-space: normal; }
+th { color: var(--ink-2); font-weight: 600; }
+.scroll { overflow-x: auto; }
+.note { color: var(--ink-2); font-size: 0.88rem; }
+code { font-size: 0.88em; background: var(--surface-2); padding: 1px 4px; border-radius: 4px; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 720px) { .cols { grid-template-columns: 1fr; } .bars, .axis { grid-template-columns: 110px 1fr; } header h1 { font-size: 1.6rem; } }
+footer { margin-top: 48px; color: var(--ink-2); font-size: 0.85rem; }
+.theme { float: right; font-size: 0.85rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="theme"><button class="link" id="themeBtn" type="button">Toggle dark mode</button></div>
+  <h1>Valkey with more data than RAM</h1>
+  <p class="lede">What happens to a Redis-compatible cache when its data does not fit in memory, and the kernel compresses
+  the overflow (zram, zswap) or pages it to SSD (disk swap)? Valkey 9.2 with 40 GB and 64 GB of data on a 32 GB server,
+  lz4 and zstd at several levels, six workloads, measured with
+  <a href="https://github.com/Percona-Lab/kv-compress-bench">kvbench</a>.</p>
+  <div class="disclosure"><strong>AI-generated results.</strong> This benchmark was designed, run and analyzed with an AI assistant (Claude).
+  Results were spot-checked by a person, but not every number and explanation has been verified in detail, and they may contain mistakes.
+  All code and raw data are <a href="https://github.com/Percona-Lab/kv-compress-bench">published on GitHub</a>; please
+  <a href="https://github.com/Percona-Lab/kv-compress-bench/issues">open an issue</a> if you find a problem.</div>
+</header>
+
+<div class="tiles" id="tiles"></div>
+
+<h2>Key findings</h2>
+<ul>
+  <li><strong>zram with lz4 is the best option tested.</strong> With 40 GB of data on 31 GB of RAM (about 30% of Valkey's memory compressed),
+  it costs 27% of throughput when every key is equally likely, 5-8% with skewed access and about nothing with a tight hot set.
+  At 64 GB (2x RAM) Valkey still delivers 57-96% of its in-RAM throughput.</li>
+  <li><strong>zstd loses to lz4 at every level tried (3, 1, -1).</strong> It compresses Valkey's pages 7.5-8.4x instead of 4.6x and keeps
+  4-5 GB more of Valkey uncompressed, but that cuts page faults by only about 10% while each fault costs about twice as much CPU.</li>
+  <li><strong>zswap matches zram, unless its shrinker is on.</strong> The shrinker (on by default in recent kernels) writes compressed pages to disk
+  under memory pressure even when the pool has room; at 2x RAM it cut zswap-zstd throughput by 70%. <a href="#shrinker">Details below.</a></li>
+  <li><strong>Disk swap stalls Valkey's single thread</strong> on every page read: 11k ops/s at 40 GB and 5k at 64 GB with uniform access,
+  10-17x slower than zram with lz4.</li>
+  <li><strong>Variable value sizes use 14% less memory</strong> than fixed 1 KiB values and, at the same memory size, cause about 25% fewer page faults.</li>
+</ul>
+
+<h2 id="explore">Explore the results</h2>
+<div class="card">
+  <div class="controls">
+    <label>Data set<select id="ds">
+      <option value="40g">40 GB of data, 1 KiB values</option>
+      <option value="64g">64 GB of data (2x RAM), 1 KiB values</option>
+      <option value="var40g">40 GB of data, 0-2000 B values</option>
+    </select></label>
+    <label>Measure<select id="metric">
+      <option value="ops">Throughput at full load</option>
+      <option value="p99">p99 latency at 50k ops/s</option>
+      <option value="p999">p99.9 latency at 50k ops/s</option>
+      <option value="faults">Page faults per operation</option>
+    </select></label>
+    <label>Key access<select id="wl"></select></label>
+  </div>
+  <div class="legend" id="legend"></div>
+  <p class="chart-title" id="ctitle"></p>
+  <p class="chart-sub" id="csub"></p>
+  <div id="chart"></div>
+  <div class="toggle"><button class="link" type="button" data-table="chart">Show as table</button></div>
+  <div class="scroll" id="chart-table" hidden></div>
+</div>
+
+<h2 id="shrinker">The zswap shrinker</h2>
+<div class="cols">
+<div>
+<p>zswap is a compressed cache in front of a normal swap device. Pages the kernel swaps out are compressed into a RAM pool
+instead of being written to disk, and read back from the pool without any disk I/O. Pages leave the pool for the disk only by <em>writeback</em>.</p>
+<p><strong>Shrinker off</strong> (<code>shrinker_enabled=N</code>): writeback happens only when the pool reaches
+<code>max_pool_percent</code> of RAM. Until then everything stays compressed in RAM and zswap behaves like zram.</p>
+<p><strong>Shrinker on</strong> (<code>Y</code>, the default on this kernel): the pool takes part in memory reclaim like other caches.
+Whenever memory is tight, zswap writes its coldest compressed pages to disk, even with the pool far below its limit. That helps when
+swapped-out memory is really idle. In a cache the "cold" pages are still read, and memory stays tight as long as the data exceeds RAM, so
+those pages become disk reads in Valkey's single thread.</p>
+<p class="note">For caches whose data exceeds RAM: use zram, or set <code>zswap.shrinker_enabled=0</code>.</p>
+</div>
+<div class="card" style="margin:0">
+  <p class="chart-title">64 GB of data, uniform access: throughput at full load</p>
+  <p class="chart-sub">Same compressor, shrinker on (kernel default) vs off</p>
+  <div id="shrinkchart"></div>
+  <div class="toggle"><button class="link" type="button" data-table="shrinkchart">Show as table</button></div>
+  <div class="scroll" id="shrinkchart-table" hidden></div>
+</div>
+</div>
+
+<h2>Where the memory is</h2>
+<p>Valkey's memory at the end of the uniform full-load run: how much stays resident (uncompressed) and how much is swapped out,
+with the compression ratio the kernel achieved on Valkey's real pages (bare values compress 3.8x with lz4 and 7.3x with zstd 3).</p>
+<div class="card scroll" id="memtable"></div>
+
+<h2>Fixed vs variable value sizes</h2>
+<p>Values uniformly distributed between 0 and 2000 bytes (mean ~1006 B) instead of a fixed 1024 B. The same 30M keys take 14% less memory
+(jemalloc stores a 1 KiB value plus header in a 1280-byte slot); with 35M keys the variable data set matches the fixed one's memory.
+Throughput in ops/s with page faults per operation.</p>
+<div class="card scroll" id="vartable"></div>
+
+<h2>Kvrocks and Lavik</h2>
+<div id="stores"><p class="note">In progress: the same data sets on Kvrocks 2.17 (shipped configuration, and with lz4 / zstd compression)
+and Lavik 0.3.2, which keep data on SSD. Lavik is designed for NVMe; this host has SATA SSDs.</p></div>
+
+<h2>How it was measured</h2>
+<ul>
+  <li><strong>Server:</strong> Vultr bare metal, Intel Xeon E-2286G (6 cores / 12 threads), 32 GB RAM (31 GB usable), 2x 960 GB SATA SSD,
+  Ubuntu 26.04, kernel 7.0, turbo off. This CPU runs with PTI/IBRS/MDS mitigations, so system calls are expensive; absolute numbers
+  will be higher on newer hardware.</li>
+  <li><strong>Valkey 9.2.0</strong>, single main thread (default <code>io-threads 1</code>), no persistence, no <code>maxmemory</code>,
+  on CPUs 1-3,7-9. The client, <a href="https://github.com/Percona-Lab/kv-compress-bench/tree/main/kvbench">kvbench</a> (Rust), runs on CPUs 4,5,10,11:
+  4 threads x 16 connections, one request in flight per connection, over loopback TCP.</li>
+  <li><strong>Data:</strong> integer keys; 1 KiB values with 10% random characters (or uniform 0-2000 B). 90% GET / 10% SET.</li>
+  <li><strong>Workloads:</strong> full load with uniform, zipfian 0.99, hotspot (90% of operations on 10% of keys) and normal (standard deviation 5% of the key space)
+  key access; and a fixed 50k ops/s with uniform and zipfian access, where latency is measured from the scheduled send time.</li>
+  <li><strong>Steady state:</strong> before every point the key distribution runs at full load until two 30-second chunks agree within 2%,
+  then 60 s warm-up and 120 s measured. Every run uses a fresh random request stream.</li>
+  <li><strong>Noise:</strong> about 1% for throughput and p99, about &plusmn;15 &micro;s for p99.9 at 50k ops/s (two runs of the in-RAM baseline).
+  Each configuration was run once.</li>
+</ul>
+<h3>Settings that are not defaults</h3>
+<div class="card scroll"><table>
+<tr><th>Component</th><th class="l">Setting</th></tr>
+<tr><td>Valkey 9.2.0</td><td class="l"><code>--save ""</code>, <code>--appendonly no</code>, <code>--protected-mode no</code> (loopback only); everything else default</td></tr>
+<tr><td>Host</td><td class="l"><code>vm.overcommit_memory=1</code>, turbo off, performance governor, conntrack skipped for loopback</td></tr>
+<tr><td>Disk swap</td><td class="l">swap file on the second SSD (64 GB; 96 GB for the 64 GB data set), swappiness 60</td></tr>
+<tr><td>zram</td><td class="l">one device (64 / 96 GB), no disk swap, swappiness 180, <code>page-cluster 0</code>, <code>watermark_boost_factor 0</code>, <code>watermark_scale_factor 125</code>; zstd level via <code>algorithm_params</code> (default 3)</td></tr>
+<tr><td>zswap</td><td class="l"><code>zsmalloc</code>, <code>max_pool_percent 50</code>, same swap file as disk swap, swappiness 100, same three sysctls as zram; <code>shrinker_enabled</code> kernel default <code>Y</code> unless marked "shrinker off"</td></tr>
+</table></div>
+
+<footer>
+  Code, plans, raw per-second data and the generator of this page:
+  <a href="https://github.com/Percona-Lab/kv-compress-bench">github.com/Percona-Lab/kv-compress-bench</a>
+  (<a href="https://github.com/Percona-Lab/kv-compress-bench/blob/main/RESULTS.md">RESULTS.md</a>,
+  <a href="results.json">results.json</a>). Apache-2.0.
+</footer>
+</div>
+<div class="tip" id="tip" role="tooltip"></div>
+
+<script>
+const DATA = /*__DATA__*/[];
+const WL = {
+  "uniform|closed": "Uniform", "zipfian:0.99|closed": "Zipfian 0.99", "hotspot:0.1:0.9|closed": "Hotspot (90% of ops on 10% of keys)",
+  "normal:0.5:0.05|closed": "Normal (sd 5% of keys)", "uniform|rate50000": "Uniform", "zipfian:0.99|rate50000": "Zipfian 0.99"
+};
+const MODES = [
+  ["none", "In RAM (20 GB, no swap)", "ram"], ["zram-lz4", "zram · lz4", "zram"], ["zram-zstd", "zram · zstd 3", "zram"],
+  ["zram-zstd1", "zram · zstd 1", "zram"], ["zram-zstd-1", "zram · zstd -1", "zram"], ["zswap-lz4", "zswap · lz4", "zswap"],
+  ["zswap-lz4-noshrink", "zswap · lz4 · shrinker off", "zswap"], ["zswap-zstd", "zswap · zstd 3", "zswap"],
+  ["zswap-zstd-noshrink", "zswap · zstd 3 · shrinker off", "zswap"], ["disk", "disk swap", "disk"]
+];
+const FAM = { ram: ["In RAM", "--ram"], zram: ["zram", "--zram"], zswap: ["zswap", "--zswap"], disk: ["disk swap", "--disk"] };
+const fmtK = v => v >= 1000 ? (v / 1000).toFixed(1) + "k" : String(v);
+const tickK = v => v >= 1000 ? +(v / 1000).toFixed(1) + "k" : String(+v.toFixed(2));
+const fmtUs = v => v >= 10000 ? (v / 1000).toFixed(0) + " ms" : v >= 1000 ? (v / 1000).toFixed(2) + " ms" : v.toFixed(0) + " µs";
+
+function find(ds, mode, wl) {
+  let r = DATA.find(d => d.ds === ds && d.mode === mode && d.wl === wl && d.store === "valkey");
+  if (!r && mode === "none") {  // baselines: 1 KiB data sets share the 40 GB run's in-RAM baseline; variable sizes use their own
+    const bds = ds === "var40g" ? "var30m" : "40g";
+    r = DATA.find(d => d.ds === bds && d.mode === "none" && d.wl === wl);
+  }
+  return r;
+}
+
+function el(tag, attrs, text) {
+  const e = document.createElement(tag);
+  for (const k in attrs || {}) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  return e;
+}
+
+const tip = document.getElementById("tip");
+function showTip(ev, r, label) {
+  tip.replaceChildren();
+  tip.append(el("b", {}, label), el("br"));
+  const lines = [];
+  if (r.wl.includes("rate")) {
+    lines.push(["achieved", fmtK(r.ops) + " ops/s" + (r.met ? "" : " (target missed)")]);
+    lines.push(["p50 / p99 / p99.9", r.met ? `${fmtUs(r.p50)} / ${fmtUs(r.p99)} / ${fmtUs(r.p999)}` : "queue built up; not meaningful"]);
+  } else {
+    lines.push(["throughput", fmtK(r.ops) + " ops/s"]);
+    lines.push(["p50 / p99", `${fmtUs(r.p50)} / ${fmtUs(r.p99)}`]);
+  }
+  if (r.mode !== "none") lines.push(["page faults per op", r.faults.toFixed(3)]);
+  if (r.used_gb) lines.push(["Valkey memory", `${r.used_gb} GB (${r.rss_gb} resident, ${r.swap_gb} swapped)`]);
+  if (r.ratio) lines.push(["compression ratio", r.ratio.toFixed(1) + "x"]);
+  if (r.zswap_wb_s) lines.push(["zswap writeback", r.zswap_wb_s + " pages/s"]);
+  for (const [k, v] of lines) { const d = el("div"); d.append(el("span", { class: "k" }, k + ": "), document.createTextNode(v)); tip.append(d); }
+  tip.style.display = "block";
+  const x = Math.min(ev.clientX + 14, window.innerWidth - tip.offsetWidth - 8);
+  const y = Math.min(ev.clientY + 14, window.innerHeight - tip.offsetHeight - 8);
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+function hideTip() { tip.style.display = "none"; }
+
+// rows: {label, fam, value, text, r}; value null = no bar (text explains)
+function bars(container, rows, opts) {
+  const root = document.getElementById(container);
+  root.replaceChildren();
+  const vals = rows.filter(r => r.value != null).map(r => r.value).sort((a, b) => a - b);
+  let max = vals.length ? vals[vals.length - 1] : 1;
+  if (opts.clip && vals.length > 2) {  // keep extreme values (disk swap latency) from flattening the rest
+    const med = vals[Math.floor(vals.length / 2)];
+    const keep = vals.filter(v => v <= med * 8);
+    if (keep.length < vals.length) max = keep[keep.length - 1] * 1.15;
+  }
+  const nice = niceMax(max);
+  const grid = el("div", { class: "bars" });
+  const ticks = [0, 0.25, 0.5, 0.75, 1].map(f => f * nice);
+  for (const row of rows) {
+    grid.append(el("div", { class: "name", title: row.label }, row.label));
+    const track = el("div", { class: "track", tabindex: "0", "aria-label": `${row.label}: ${row.text}` });
+    const gl = el("div", { class: "gridlines" });
+    for (const t of ticks.slice(1)) { const i = el("i"); i.style.left = (t / nice * 100) + "%"; gl.append(i); }
+    track.append(gl);
+    if (row.value != null) {
+      const w = Math.min(row.value / nice, 1) * 100;
+      const b = el("div", { class: "bar" }); b.style.width = `calc(${w}% - 2px)`; b.style.setProperty("--c", `var(${FAM[row.fam][1]})`);
+      track.append(b);
+      if (row.value > nice) { const c = el("div", { class: "clip" }); c.style.left = `calc(${w}% - 26px)`; track.append(c); }
+      const v = el("div", { class: "val" }, row.text);
+      if (w > 72) { v.style.right = `calc(${100 - w}% + 8px)`; v.style.color = "#fff"; v.style.fontWeight = "600"; }
+      else v.style.left = `calc(${w}% + 6px)`;
+      track.append(v);
+    } else {
+      const v = el("div", { class: "val" }, row.text); v.style.left = "6px"; track.append(v);
+    }
+    if (row.r) {
+      track.addEventListener("pointermove", ev => showTip(ev, row.r, row.label));
+      track.addEventListener("pointerleave", hideTip);
+      track.addEventListener("focus", ev => { const b = track.getBoundingClientRect(); showTip({ clientX: b.left + 40, clientY: b.bottom }, row.r, row.label); });
+      track.addEventListener("blur", hideTip);
+    }
+    grid.append(track);
+  }
+  root.append(grid);
+  const ax = el("div", { class: "axis" }); ax.append(el("div"));
+  const tk = el("div", { class: "ticks" });
+  for (const t of ticks) { const s = el("span", {}, opts.fmt(t)); s.style.left = (t / nice * 100) + "%"; tk.append(s); }
+  ax.append(tk); root.append(ax);
+  // table view
+  const tbl = document.getElementById(container + "-table");
+  if (tbl) {
+    const t = el("table"); const h = el("tr"); h.append(el("th", {}, "Configuration"), el("th", {}, opts.unit)); t.append(h);
+    for (const row of rows) { const tr = el("tr"); tr.append(el("td", {}, row.label), el("td", {}, row.text)); t.append(tr); }
+    tbl.replaceChildren(t);
+  }
+}
+function niceMax(v) {
+  if (v <= 0) return 1;
+  const p = Math.pow(10, Math.floor(Math.log10(v)));
+  for (const m of [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10]) if (m * p >= v) return m * p;
+  return 10 * p;
+}
+
+const $ = id => document.getElementById(id);
+function wlOptions() {
+  const m = $("metric").value, cur = $("wl").value;
+  const keys = (m === "p99" || m === "p999") ? ["uniform|rate50000", "zipfian:0.99|rate50000"]
+    : ["uniform|closed", "zipfian:0.99|closed", "hotspot:0.1:0.9|closed", "normal:0.5:0.05|closed"];
+  $("wl").replaceChildren(...keys.map(k => el("option", { value: k }, WL[k])));
+  const same = keys.find(k => k.split("|")[0] === (cur || "").split("|")[0]);
+  $("wl").value = same || keys[0];
+}
+function render() {
+  const ds = $("ds").value, m = $("metric").value, wl = $("wl").value;
+  const rows = [];
+  for (const [mode, label, fam] of MODES) {
+    if (m === "faults" && mode === "none") continue;
+    const r = find(ds, mode, wl);
+    if (!r) continue;
+    let value, text;
+    if (m === "ops") { value = r.ops; text = fmtK(r.ops) + " ops/s"; }
+    else if (m === "faults") { value = r.faults; text = r.faults.toFixed(3); }
+    else if (!r.met) { value = null; text = `target missed: reached only ${fmtK(r.ops)} ops/s`; }
+    else { value = r[m]; text = fmtUs(r[m]); }
+    rows.push({ label: mode === "none" && ds === "var40g" ? "In RAM (17 GB, no swap)" : label, fam, value, text, r });
+  }
+  const dsName = $("ds").selectedOptions[0].text;
+  const mName = { ops: "Throughput at full load (ops/s, higher is better)", p99: "p99 latency at a fixed 50k ops/s (lower is better)",
+    p999: "p99.9 latency at a fixed 50k ops/s (lower is better)", faults: "Page faults per operation (pages read back from swap; lower is better)" }[m];
+  $("ctitle").textContent = `${mName}`;
+  $("csub").textContent = `${dsName} · ${WL[wl]} key access · 31 GB RAM`;
+  bars("chart", rows, { clip: m !== "ops", unit: mName, fmt: m === "ops" ? tickK : m === "faults" ? (v => v.toFixed(2)) : (v => fmtUs(v)) });
+}
+function legend() {
+  const lg = $("legend");
+  for (const k of ["ram", "zram", "zswap", "disk"]) { const s = el("span", {}, FAM[k][0]); s.style.setProperty("--c", `var(${FAM[k][1]})`); lg.append(s); }
+}
+function tiles() {
+  const base = find("40g", "none", "uniform|closed").ops;
+  const t = [
+    [Math.round(find("40g", "zram-lz4", "uniform|closed").ops / base * 100) + "%", "of in-RAM throughput with zram lz4, 40 GB of data, uniform access"],
+    [Math.round(find("64g", "zram-lz4", "uniform|closed").ops / base * 100) + "%", "with zram lz4 at 64 GB (2x RAM), uniform access"],
+    [Math.round(find("64g", "disk", "uniform|closed").ops / base * 100) + "%", "with disk swap at 64 GB, uniform access"],
+    [Math.round((1 - find("64g", "zswap-zstd", "uniform|closed").ops / find("64g", "zswap-zstd-noshrink", "uniform|closed").ops) * 100) + "%",
+      "less throughput for zswap zstd at 64 GB with the shrinker on (default)"],
+  ];
+  for (const [n, l] of t) { const d = el("div", { class: "tile" }); d.append(el("div", { class: "num" }, n), el("div", { class: "lbl" }, l)); $("tiles").append(d); }
+}
+function shrink() {
+  const rows = [["zram-lz4", "zram · lz4", "zram"], ["zswap-lz4", "zswap · lz4 · shrinker on", "zswap"], ["zswap-lz4-noshrink", "zswap · lz4 · shrinker off", "zswap"],
+    ["zram-zstd", "zram · zstd 3", "zram"], ["zswap-zstd", "zswap · zstd 3 · shrinker on", "zswap"], ["zswap-zstd-noshrink", "zswap · zstd 3 · shrinker off", "zswap"]]
+    .map(([mode, label, fam]) => { const r = find("64g", mode, "uniform|closed"); return { label, fam, value: r.ops, text: fmtK(r.ops) + " ops/s", r }; });
+  bars("shrinkchart", rows, { unit: "Throughput (ops/s)", fmt: tickK });
+}
+function memtable() {
+  const t = el("table", { class: "t2" }); const h = el("tr");
+  for (const c of ["Data", "Mode", "Valkey memory (GB)", "Resident (GB)", "Swapped out (GB)", "Compression ratio"]) h.append(el("th", {}, c));
+  t.append(h);
+  for (const [ds, dsl] of [["40g", "40 GB"], ["64g", "64 GB"]]) for (const [mode, label] of MODES.slice(1, -1)) {
+    const r = find(ds, mode, "uniform|closed"); if (!r) continue;
+    const tr = el("tr");
+    for (const v of [dsl, label, r.used_gb.toFixed(1), r.rss_gb.toFixed(1), r.swap_gb.toFixed(1), r.ratio ? r.ratio.toFixed(1) + "x" : ""]) tr.append(el("td", {}, String(v)));
+    t.append(tr);
+  }
+  $("memtable").append(t);
+}
+function vartable() {
+  const t = el("table", { class: "t2" }); const h = el("tr");
+  const u = (ds, mode) => (find(ds, mode, "uniform|closed") || {}).used_gb;
+  for (const c of ["Mode", "Key access", `Fixed 1 KiB, 30M keys (${u("40g", "zram-lz4")} GB)`, `Variable, 35M keys (${u("var40g", "zram-lz4")} GB)`, `Variable, 30M keys (${u("var30m", "zram-lz4")} GB)`]) h.append(el("th", {}, c));
+  t.append(h);
+  for (const [mode, label] of [["zram-lz4", "zram · lz4"], ["zram-zstd", "zram · zstd 3"], ["zswap-lz4", "zswap · lz4"], ["zswap-zstd", "zswap · zstd 3"], ["disk", "disk swap"]])
+    for (const wl of ["uniform|closed", "zipfian:0.99|closed"]) {
+      const tr = el("tr"); tr.append(el("td", {}, label), el("td", {}, WL[wl]));
+      for (const ds of ["40g", "var40g", "var30m"]) { const r = find(ds, mode, wl); tr.append(el("td", {}, r ? `${fmtK(r.ops)} (${r.faults.toFixed(3)})` : "")); }
+      t.append(tr);
+    }
+  $("vartable").append(t);
+}
+function stores() {
+  const rows = DATA.filter(d => d.store !== "valkey");
+  if (!rows.length) return;
+  const box = $("stores"); box.replaceChildren();
+  box.append(el("p", {}, "Kvrocks and Lavik keep data on SSD and use RAM as a cache. Throughput at full load, with Valkey (zram lz4) for reference."));
+  const order = ["kvrocks", "kvrocks-lz4", "kvrocks-zstd", "lavik"];
+  const names = { "kvrocks": "Kvrocks (shipped config, snappy)", "kvrocks-lz4": "Kvrocks · lz4", "kvrocks-zstd": "Kvrocks · zstd", "lavik": "Lavik 0.3.2" };
+  for (const ds of ["40g", "64g"]) {
+    const card = el("div", { class: "card" });
+    card.append(el("p", { class: "chart-title" }, `${ds === "40g" ? "40 GB" : "64 GB"} of data · uniform access · throughput at full load`));
+    const id = "st-" + ds; card.append(el("div", { id }));
+    box.append(card);
+    const rr = [];
+    const v = find(ds, "zram-lz4", "uniform|closed"); if (v) rr.push({ label: "Valkey · zram lz4", fam: "zram", value: v.ops, text: fmtK(v.ops) + " ops/s", r: v });
+    for (const m of order) { const r = rows.find(d => d.ds === ds && d.mode === m && d.wl === "uniform|closed"); if (r) rr.push({ label: names[m], fam: "ram", value: r.ops, text: fmtK(r.ops) + " ops/s", r }); }
+    bars(id, rr, { unit: "Throughput (ops/s)", fmt: tickK });
+  }
+}
+document.querySelectorAll("button[data-table]").forEach(b => b.addEventListener("click", () => {
+  const t = $(b.dataset.table + "-table"); t.hidden = !t.hidden; b.textContent = t.hidden ? "Show as table" : "Hide table";
+}));
+$("themeBtn").addEventListener("click", () => {
+  const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  document.documentElement.dataset.theme = dark ? "light" : "dark";
+});
+for (const id of ["ds", "metric", "wl"]) $(id).addEventListener("change", () => { if (id === "metric") wlOptions(); render(); });
+legend(); tiles(); wlOptions(); render(); shrink(); memtable(); vartable(); stores();
+</script>
+</body>
+</html>

@@ -98,6 +98,8 @@ memory modes are set by `host/swapmode.sh`. Note that Lavik is designed for NVMe
 
 ## Results
 
+**Web page: https://percona-lab.github.io/kv-compress-bench/** (interactive charts, generated from `data/` by `tools/build_site.py`).
+
 **[RESULTS.md](RESULTS.md)**: Valkey 9.2 with 40 GB and 64 GB of data on 32 GB of RAM, using zram, zswap and disk
 swap, lz4 and zstd (levels 3, 1, -1), fixed and variable value sizes. In short:
 
