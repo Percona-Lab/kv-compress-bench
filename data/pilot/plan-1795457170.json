@@ -1,0 +1,12 @@
+{
+  "name": "pilot",
+  "defaults": {"threads": 4, "conns": 16, "cpus": "4,5,10,11", "warmup": 60, "time": 60},
+  "groups": [
+    {"store": "valkey", "swap": "zram-lz4",
+     "data": {"keys": 30000000, "value_size": "fixed:1024", "value_random_pct": 10},
+     "points": [{"key_dist": "uniform"}, {"key_dist": "zipfian:0.99"}, {"key_dist": "uniform", "rate": 50000}]},
+    {"store": "valkey", "swap": "none",
+     "data": {"keys": 15000000, "value_size": "fixed:1024", "value_random_pct": 10},
+     "points": [{"key_dist": "uniform"}, {"key_dist": "zipfian:0.99"}, {"key_dist": "uniform", "rate": 50000}]}
+  ]
+}
