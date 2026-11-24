@@ -98,4 +98,20 @@ memory modes are set by `host/swapmode.sh`. Note that Lavik is designed for NVMe
 
 ## Results
 
-To come.
+**[RESULTS.md](RESULTS.md)**: Valkey 9.2 with 40 GB and 64 GB of data on 32 GB of RAM, using zram, zswap and disk
+swap, lz4 and zstd (levels 3, 1, -1), fixed and variable value sizes. In short:
+
+* zram with lz4 is the best option tested: at 40 GB (30% of memory compressed) it costs 27% of throughput with
+  uniform access and 0-8% with skewed access; at 64 GB (2x RAM) Valkey still does 57-96% of its in-RAM throughput,
+  versus 3-86% with disk swap.
+* zstd's better compression ratio does not make up for its higher CPU cost per page at any level tried.
+* zswap performs like zram unless its shrinker (on by default in recent kernels) writes compressed pages back to disk,
+  which at 2x RAM cut zswap-zstd throughput by 70%.
+
+Kvrocks and Lavik results are in progress.
+
+## Running a study
+
+`bench/study.py plan.json` runs a plan (see `bench/plans/`): for each group it sets the swap mode
+(`host/swapmode.sh`), starts the store (`bench/kvctl.sh`), loads the data, and for each workload point settles
+the key distribution at full load before the timed run. Results go to `/root/results/<plan name>/`.

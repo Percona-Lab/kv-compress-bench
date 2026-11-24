@@ -1,0 +1,180 @@
+# Results: Valkey with zram, zswap and disk swap
+
+> **AI disclosure.** This study was designed, run and analyzed with an AI assistant (Claude). Results were
+> spot-checked by a person, but not every number and explanation has been verified in detail, and they may
+> contain mistakes. Raw data is in [`data/`](data/) and the tables below are generated from it by
+> [`tools/report.py`](tools/report.py). Please open an issue if you find a problem.
+
+Valkey 9.2.0 (single main thread, default `io-threads 1`) with more data than RAM, on a 6-core Xeon E-2286G with
+32 GB RAM (31 GB usable) and SATA SSDs, Ubuntu 26.04, kernel 7.0. Valkey keeps everything in memory; when it does not
+fit, the kernel swaps pages out: to compressed RAM (zram, or zswap in front of a swap file) or to the SSD (disk swap).
+
+## Summary
+
+* **zram with lz4 is the best choice in every test.** With 40 GB of data on 31 GB of RAM (~30% of Valkey's memory
+  compressed) it costs 27% of throughput with uniform key access, 5-8% with skewed access and ~0% with a tight
+  hot set; at a fixed 50k ops/s p99 latency rises from 57 µs to 70-99 µs. At 64 GB (2x RAM) it still delivers
+  57-96% of in-RAM throughput (uniform to normal), versus 3-86% for disk swap.
+* **zstd is slower than lz4 at every level we tried (3, 1, -1).** It compresses Valkey's pages ~7.5-8.4x vs 4.6x
+  for lz4, which keeps 4-5 GB more of Valkey resident at 64 GB, but that cuts page faults only ~10% while each
+  fault costs roughly twice as much CPU. Level -1 is the best zstd level here.
+* **zswap equals zram, unless its shrinker is on.** On this kernel `zswap.shrinker_enabled` defaults to `Y`, which
+  writes compressed pages back to the disk swap file under memory pressure even when the pool has room. For a
+  cache, those pages are still read, so they become disk reads: at 64 GB zswap-zstd dropped to 16k ops/s (54k with
+  the shrinker off) and zswap-lz4 to 65k (82k off; zram 84k). See [the zswap shrinker](#the-zswap-shrinker).
+* **Disk swap stalls Valkey.** Its single thread waits for each page read: 11k ops/s with uniform access at 40 GB
+  and 5k at 64 GB, versus 107k / 84k with zram-lz4. It cannot hold 50k ops/s with uniform access at either size.
+* **Variable value sizes (0-2000 B) use 14% less memory than fixed 1 KiB values** (jemalloc puts 1 KiB + header
+  in the 1280-byte size class) and, at the same memory size, cause ~25% fewer page faults per operation than
+  fixed values (likely because pages full of small values are hotter and stay resident; not verified).
+  Fragmentation stayed at 1.02 with 10% of operations rewriting values at new random sizes.
+
+## Method
+
+* `kvbench` (this repository): 90% GET / 10% SET, integer keys, values 1 KiB with 10% random characters
+  (lz4 ~3.8x, zstd ~7.3x on 4 KiB pages of bare values; Valkey's pages compress better, see the memory table).
+  4 client threads x 16 connections, one request in flight per connection.
+* Workloads: full load (closed loop) with uniform, zipfian 0.99, hotspot (90% of operations on 10% of keys) and
+  normal (sd 5% of the key space) key access; fixed 50k ops/s (open loop, latency measured from the scheduled send
+  time) with uniform and zipfian access.
+* Each store / swap mode / data set is loaded once; before every workload point the runner drives that key
+  distribution at full load until two 30 s chunks are within 2% (max 10 min, 30 min for disk swap), then runs 60 s
+  warm-up + 120 s measured. Every run uses a fresh random request stream.
+* Server on CPUs 1-3,7-9, client on 4,5,10,11 (OS on 0,6); turbo off, performance governor. The client needs about
+  as much CPU per operation as the server (loopback TCP: the sender also does the receiver's network work).
+  Results where the client threads were >90% busy are flagged in the data (none in the tables below).
+* Run-to-run noise (in-RAM baseline, two runs): ~1% for throughput and p99, ~±15 µs for p99.9 at 50k ops/s.
+  Each configuration was run once.
+* This CPU (Coffee Lake) runs with PTI/IBRS/MDS mitigations, so syscalls are expensive; absolute numbers will be
+  higher on newer hardware.
+
+### Settings that are not defaults
+
+| Component | Setting |
+|---|---|
+| Valkey 9.2.0 | `--save ""`, `--appendonly no` (no persistence), `--protected-mode no` (loopback only); everything else default (`io-threads 1`, no `maxmemory`) |
+| Host | `vm.overcommit_memory=1`, turbo off, performance governor, conntrack skipped for loopback |
+| disk swap | 64 GB (96 GB for the 64 GB data set) swap file on the second SSD, swappiness 60, other sysctls default |
+| zram | one zram device 64 GB (96 GB for the 64 GB data set), no disk swap, swappiness 180, `page-cluster 0`, `watermark_boost_factor 0`, `watermark_scale_factor 125`; zstd level via `algorithm_params` (default 3) |
+| zswap | `zsmalloc`, `max_pool_percent 50`, swap file as for disk swap, swappiness 100, same three sysctls as zram; `shrinker_enabled` kernel default `Y` unless marked "shrinker off" |
+
+`host/swapmode.sh` sets each mode; every result line in `data/` records the swap, zswap and sysctl state.
+
+## The zswap shrinker
+
+zswap is a compressed cache in front of a normal swap device: pages being swapped out are compressed into a RAM pool
+instead of being written to disk, and read back from the pool without disk I/O. Pages leave the pool for the swap
+device only by **writeback**.
+
+* **Shrinker off** (`/sys/module/zswap/parameters/shrinker_enabled = N`): writeback happens only when the pool
+  reaches `max_pool_percent` of RAM. Until then everything stays compressed in RAM and zswap behaves like zram, with
+  the disk as overflow. In our 64 GB runs the pool held 5-10 GB of a ~15.5 GB limit, so nothing was written back.
+* **Shrinker on** (`Y`, the default on this kernel): the pool is registered with the kernel's memory reclaim, like
+  other caches. Whenever memory is tight, the kernel asks zswap to shrink, and zswap writes its coldest compressed
+  pages to the swap device even though the pool is far from its limit. The goal is to give the RAM to hot
+  uncompressed pages, which works when swapped-out memory is really idle.
+
+For a cache like Valkey the "cold" pages are still read, just less often (with uniform access, every key is equally
+likely), and memory stays tight for as long as the data set exceeds RAM, so the shrinker keeps running and those
+pages turn into synchronous disk reads in Valkey's single thread. At 64 GB, during the load the shrinker wrote back
+~4.3k pages/s with lz4 and ~18.5k pages/s with zstd (slower compression keeps the system under pressure longer; our
+best explanation, not confirmed); with zstd ~25% of page faults were then served from disk. At 40 GB it wrote back
+fewer than 100 pages/s and made no difference. zram has no such mechanism (it only writes to a backing device if
+one is configured and writeback is triggered).
+
+For caches whose data set exceeds RAM, use zram or set `zswap.shrinker_enabled=0`.
+
+## Tables
+
+Values are throughput in ops/s with page faults per operation in parentheses (each fault = one page read back from
+swap: decompressed for zram/zswap, read from the SSD for disk swap), or p99 / p99.9 latency in µs at 50k ops/s;
+"missed" = the 50k ops/s target was not reached (achieved rate in parentheses).
+
+### 40 GB (30M keys x 1 KiB, 31 GB RAM): throughput at full load (ops/s) (page faults per op)
+
+In RAM = 15M keys (20 GB), no swap. Kernel defaults for zswap (shrinker on).
+
+| workload | in RAM | zram lz4 | zram zstd 3 | zram zstd 1 | zram zstd -1 | zswap lz4 | zswap zstd 3 | disk swap |
+|---|---|---|---|---|---|---|---|---|
+| uniform | 147.2k | 107.2k (0.385) | 90.5k (0.340) | 88.3k (0.339) | 94.4k (0.346) | 107.0k (0.384) | 90.2k (0.338) | 11.3k (0.268) |
+| zipfian 0.99 | 150.2k | 138.5k (0.072) | 131.4k (0.067) | 131.8k (0.063) | 133.1k (0.065) | 137.9k (0.071) | 130.4k (0.065) | 38.2k (0.062) |
+| hotspot 10%/90% | 147.1k | 140.4k (0.043) | 135.7k (0.038) | 135.5k (0.038) | 135.5k (0.039) | 138.5k (0.043) | 134.8k (0.038) | 63.1k (0.030) |
+| normal (sd 5%) | 146.9k | 146.7k (0.007) | 145.2k (0.005) | 144.2k (0.007) | 143.5k (0.007) | 145.1k (0.007) | 144.2k (0.006) | 133.0k (0.002) |
+
+### 40 GB (30M keys x 1 KiB, 31 GB RAM): latency at a fixed 50k ops/s, p99 / p99.9 (µs)
+
+| workload | in RAM | zram lz4 | zram zstd 3 | zram zstd 1 | zram zstd -1 | zswap lz4 | zswap zstd 3 | disk swap |
+|---|---|---|---|---|---|---|---|---|
+| uniform @ 50k ops/s | 57 / 83 | 99 / 205 | 109 / 212 | 113 / 245 | 111 / 268 | 87 / 204 | 112 / 199 | missed (16.7k) |
+| zipfian @ 50k ops/s | 56 / 84 | 70 / 110 | 80 / 115 | 79 / 114 | 76 / 114 | 68 / 119 | 82 / 117 | 158728 / 259785 |
+
+### 64 GB (48M keys x 1 KiB, 2x RAM): throughput at full load (ops/s) (page faults per op)
+
+Disk swap at a fixed rate: latency capped at the 60 s histogram limit when the target is missed.
+
+| workload | in RAM | zram lz4 | zram zstd 3 | zram zstd 1 | zram zstd -1 | zswap lz4 | zswap lz4, shrinker off | zswap zstd 3 | zswap zstd 3, shrinker off | disk swap |
+|---|---|---|---|---|---|---|---|---|---|---|
+| uniform | 147.2k | 83.7k (0.869) | 58.6k (0.763) | 62.4k (0.768) | 73.5k (0.779) | 65.4k (0.874) | 81.7k (0.875) | 16.0k (0.748) | 54.2k (0.765) | 4.9k (0.661) |
+| zipfian 0.99 | 150.2k | 126.0k (0.193) | 112.8k (0.164) | 116.0k (0.159) | 120.1k (0.165) | 119.2k (0.194) | 124.7k (0.196) | 48.7k (0.181) | 113.2k (0.163) | 15.7k (0.186) |
+| hotspot 10%/90% | 147.1k | 133.2k (0.099) | 124.9k (0.086) | 126.0k (0.086) | 128.4k (0.088) | 131.7k (0.099) | 133.1k (0.101) | 91.6k (0.085) | 123.0k (0.087) | 35.1k (0.070) |
+| normal (sd 5%) | 146.9k | 140.6k (0.028) | 140.3k (0.016) | 141.0k (0.018) | 141.7k (0.016) | 139.9k (0.028) | 141.1k (0.028) | 135.9k (0.019) | 139.3k (0.019) | 127.0k (0.003) |
+
+### 64 GB (48M keys x 1 KiB, 2x RAM): latency at a fixed 50k ops/s, p99 / p99.9 (µs)
+
+| workload | in RAM | zram lz4 | zram zstd 3 | zram zstd 1 | zram zstd -1 | zswap lz4 | zswap lz4, shrinker off | zswap zstd 3 | zswap zstd 3, shrinker off | disk swap |
+|---|---|---|---|---|---|---|---|---|---|---|
+| uniform @ 50k ops/s | 57 / 83 | 103 / 242 | 165 / 313 | 179 / 318 | 124 / 415 | 263 / 463 | 103 / 253 | missed (35.4k) | 537 / 1649 | missed (6.6k) |
+| zipfian @ 50k ops/s | 56 / 84 | 76 / 141 | 98 / 148 | 100 / 146 | 84 / 139 | 98 / 318 | 75 / 136 | 657 / 1143 | 100 / 142 | missed (25.0k) |
+
+### Where Valkey's memory is (uniform, full load, end of run)
+
+| data | mode | Valkey used_memory GB | resident GB | swapped GB | compression ratio |
+|---|---|---|---|---|---|
+| 40 GB | zram lz4 | 39.9 | 27.8 | 11.7 | 4.6x |
+| 40 GB | zram zstd 3 | 39.9 | 29.3 | 10.1 | 8.1x |
+| 40 GB | zram zstd 1 | 39.9 | 29.2 | 10.3 | 8.4x |
+| 40 GB | zram zstd -1 | 39.9 | 28.7 | 10.7 | 7.5x |
+| 40 GB | zswap lz4 | 39.9 | 27.8 | 11.6 | 4.4x |
+| 40 GB | zswap zstd 3 | 39.9 | 29.1 | 10.3 | 7.9x |
+| 64 GB | zram lz4 | 63.6 | 20.9 | 41.8 | 4.6x |
+| 64 GB | zram zstd 3 | 63.6 | 25.1 | 37.6 | 8.1x |
+| 64 GB | zram zstd 1 | 63.6 | 25.4 | 37.3 | 8.4x |
+| 64 GB | zram zstd -1 | 63.6 | 25.0 | 37.7 | 7.5x |
+| 64 GB | zswap lz4 | 63.6 | 20.4 | 42.3 | 4.4x |
+| 64 GB | zswap lz4, shrinker off | 63.6 | 20.5 | 42.2 | 4.5x |
+| 64 GB | zswap zstd 3 | 63.6 | 25.6 | 37.1 | 7.8x |
+| 64 GB | zswap zstd 3, shrinker off | 63.6 | 25.6 | 37.1 | 7.8x |
+
+### Fixed 1 KiB vs variable 0-2000 B values (ops/s (faults/op), or p99 / p99.9 µs)
+
+| mode | workload | fixed, 30M keys (39.9 GB) | variable, 35M keys (39.9 GB) | variable, 30M keys (34.3 GB) |
+|---|---|---|---|---|
+| zram lz4 | uniform | 107.2k (0.385) | 112.7k (0.287) | 126.9k (0.135) |
+| zram lz4 | zipfian 0.99 | 138.5k (0.072) | 138.5k (0.052) | 144.6k (0.024) |
+| zram lz4 | uniform @ 50k ops/s | 99 / 205 | 85 / 176 | 73 / 128 |
+| zram zstd 3 | uniform | 90.5k (0.340) | 93.4k (0.264) | 118.2k (0.109) |
+| zram zstd 3 | zipfian 0.99 | 131.4k (0.067) | 135.0k (0.046) | 141.5k (0.020) |
+| zram zstd 3 | uniform @ 50k ops/s | 109 / 212 | 101 / 179 | 86 / 130 |
+| zswap lz4 | uniform | 107.0k (0.384) | 113.3k (0.288) | 126.7k (0.130) |
+| zswap lz4 | zipfian 0.99 | 137.9k (0.071) | 139.6k (0.052) | 143.6k (0.022) |
+| zswap lz4 | uniform @ 50k ops/s | 87 / 204 | 86 / 180 | 74 / 126 |
+| zswap zstd 3 | uniform | 90.2k (0.338) | 85.4k (0.258) | 118.0k (0.112) |
+| zswap zstd 3 | zipfian 0.99 | 130.4k (0.065) | 130.0k (0.042) | 142.0k (0.020) |
+| zswap zstd 3 | uniform @ 50k ops/s | 112 / 199 | 207 / 374 | 86 / 130 |
+| disk swap | uniform | 11.3k (0.268) | 15.4k (0.220) | 35.6k (0.079) |
+| disk swap | zipfian 0.99 | 38.2k (0.062) | 55.2k (0.045) | 103.5k (0.014) |
+| disk swap | uniform @ 50k ops/s | missed (16.7k) | missed (25.0k) | 244842 / 346030 |
+
+
+### Data that is superseded or less certain
+
+* `data/valkey-swap-r1` (first 40 GB run) is superseded: it had no settle phase (several skewed points, especially
+  disk swap, were measured before throughput was steady) and every run reused the same request stream.
+* Disk swap, 40 GB, normal access: throughput was still creeping up (settle 119k, measured 133k); treat as a lower bound.
+* zswap zstd 3 at 64 GB with the shrinker off, uniform @ 50k ops/s (p99 537 µs vs 165 µs for zram zstd 3) and the
+  variable-length 35M-key zswap zstd uniform @ 50k ops/s point (207 µs) are single outliers not yet explained.
+
+## Kvrocks and Lavik
+
+In progress: the same data sets on Kvrocks 2.17 (shipped configuration, and with lz4 / zstd compression) and
+Lavik 0.3.2. Note that Lavik is designed for NVMe; this host has SATA SSDs.
