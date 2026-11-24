@@ -110,7 +110,8 @@ swap, lz4 and zstd (levels 3, 1, -1), fixed and variable value sizes. In short:
 * zswap performs like zram unless its shrinker (on by default in recent kernels) writes compressed pages back to disk,
   which at 2x RAM cut zswap-zstd throughput by 70%.
 
-Kvrocks and Lavik results are in progress.
+* Kvrocks with lz4 gets more throughput than Valkey + zram on uniform/zipfian access at 4-7x the CPU per operation and higher
+  tail latency; TidesKV is faster still but stalls for 5-10 s at a time; Lavik is limited by SATA SSDs on this host.
 
 ## Running a study
 

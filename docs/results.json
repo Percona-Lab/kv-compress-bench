@@ -1,5 +1,7 @@
 [
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -21,6 +23,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -42,6 +46,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -63,6 +69,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -84,6 +92,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -105,6 +115,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -126,6 +138,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -147,6 +161,8 @@
 "disk_read_mb_s": 0.2
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -168,6 +184,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -189,6 +207,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -210,6 +230,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -231,6 +253,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -252,6 +276,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -273,6 +299,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -294,6 +322,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -315,6 +345,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -336,6 +368,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -357,6 +391,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -378,6 +414,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -399,6 +437,8 @@
 "disk_read_mb_s": 0.2
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -420,6 +460,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -441,6 +483,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -462,6 +506,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -483,6 +529,8 @@
 "disk_read_mb_s": 0.2
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -504,6 +552,8 @@
 "disk_read_mb_s": 0.2
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -525,6 +575,8 @@
 "disk_read_mb_s": 0.2
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -546,6 +598,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -567,6 +621,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -588,6 +644,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -609,6 +667,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -630,6 +690,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -651,6 +713,8 @@
 "disk_read_mb_s": 16.6
 },
 {
+"stall_s": 2,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -672,6 +736,8 @@
 "disk_read_mb_s": 13.3
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -693,6 +759,8 @@
 "disk_read_mb_s": 10.2
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -714,6 +782,8 @@
 "disk_read_mb_s": 1.7
 },
 {
+"stall_s": 120,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -735,6 +805,8 @@
 "disk_read_mb_s": 25.2
 },
 {
+"stall_s": 16,
+"intervals": 120,
 "study": "valkey-swap-r2",
 "ds": "40g",
 "store": "valkey",
@@ -756,6 +828,8 @@
 "disk_read_mb_s": 14.9
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-zstdfast-40g",
 "ds": "40g",
 "store": "valkey",
@@ -777,6 +851,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-zstdfast-40g",
 "ds": "40g",
 "store": "valkey",
@@ -798,6 +874,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-zstdfast-40g",
 "ds": "40g",
 "store": "valkey",
@@ -819,6 +897,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-zstdfast-40g",
 "ds": "40g",
 "store": "valkey",
@@ -840,6 +920,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-zstdfast-40g",
 "ds": "40g",
 "store": "valkey",
@@ -861,6 +943,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-zstdfast-40g",
 "ds": "40g",
 "store": "valkey",
@@ -882,6 +966,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-zstdfast-40g",
 "ds": "40g",
 "store": "valkey",
@@ -903,6 +989,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-zstdfast-40g",
 "ds": "40g",
 "store": "valkey",
@@ -924,6 +1012,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-zstdfast-40g",
 "ds": "40g",
 "store": "valkey",
@@ -945,6 +1035,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-zstdfast-40g",
 "ds": "40g",
 "store": "valkey",
@@ -966,6 +1058,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-zstdfast-40g",
 "ds": "40g",
 "store": "valkey",
@@ -987,6 +1081,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-zstdfast-40g",
 "ds": "40g",
 "store": "valkey",
@@ -1008,6 +1104,8 @@
 "disk_read_mb_s": 0.2
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1029,6 +1127,8 @@
 "disk_read_mb_s": 0.3
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1050,6 +1150,8 @@
 "disk_read_mb_s": 0.2
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1071,6 +1173,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1092,6 +1196,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1113,6 +1219,8 @@
 "disk_read_mb_s": 0.2
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1134,6 +1242,8 @@
 "disk_read_mb_s": 0.2
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1155,6 +1265,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1176,6 +1288,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1197,6 +1311,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1218,6 +1334,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1239,6 +1357,8 @@
 "disk_read_mb_s": 0.7
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1260,6 +1380,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1281,6 +1403,8 @@
 "disk_read_mb_s": 0.2
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1302,6 +1426,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1323,6 +1449,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1344,6 +1472,8 @@
 "disk_read_mb_s": 0.2
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1365,6 +1495,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1386,6 +1518,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1407,6 +1541,8 @@
 "disk_read_mb_s": 0.3
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1428,6 +1564,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1449,6 +1587,8 @@
 "disk_read_mb_s": 0.4
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1470,6 +1610,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1491,6 +1633,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1512,6 +1656,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1533,6 +1679,8 @@
 "disk_read_mb_s": 4.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1554,6 +1702,8 @@
 "disk_read_mb_s": 0.9
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1575,6 +1725,8 @@
 "disk_read_mb_s": 0.2
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1596,6 +1748,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1617,6 +1771,8 @@
 "disk_read_mb_s": 0.4
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1638,6 +1794,8 @@
 "disk_read_mb_s": 0.2
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1659,6 +1817,8 @@
 "disk_read_mb_s": 13.4
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1680,6 +1840,8 @@
 "disk_read_mb_s": 8.9
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1701,6 +1863,8 @@
 "disk_read_mb_s": 4.5
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1722,6 +1886,8 @@
 "disk_read_mb_s": 0.5
 },
 {
+"stall_s": 120,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1743,6 +1909,8 @@
 "disk_read_mb_s": 15.5
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1764,6 +1932,8 @@
 "disk_read_mb_s": 3.2
 },
 {
+"stall_s": 11,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1785,6 +1955,8 @@
 "disk_read_mb_s": 16.4
 },
 {
+"stall_s": 6,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1806,6 +1978,8 @@
 "disk_read_mb_s": 15.5
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1827,6 +2001,8 @@
 "disk_read_mb_s": 14.4
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1848,6 +2024,8 @@
 "disk_read_mb_s": 3.8
 },
 {
+"stall_s": 120,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1869,6 +2047,8 @@
 "disk_read_mb_s": 24.6
 },
 {
+"stall_s": 120,
+"intervals": 120,
 "study": "valkey-swap-64g-r1",
 "ds": "64g",
 "store": "valkey",
@@ -1890,6 +2070,8 @@
 "disk_read_mb_s": 26.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-zswap-noshrink",
 "ds": "64g",
 "store": "valkey",
@@ -1911,6 +2093,8 @@
 "disk_read_mb_s": 0.2
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-zswap-noshrink",
 "ds": "64g",
 "store": "valkey",
@@ -1932,6 +2116,8 @@
 "disk_read_mb_s": 0.3
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-zswap-noshrink",
 "ds": "64g",
 "store": "valkey",
@@ -1953,6 +2139,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-zswap-noshrink",
 "ds": "64g",
 "store": "valkey",
@@ -1974,6 +2162,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-zswap-noshrink",
 "ds": "64g",
 "store": "valkey",
@@ -1995,6 +2185,8 @@
 "disk_read_mb_s": 0.2
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-zswap-noshrink",
 "ds": "64g",
 "store": "valkey",
@@ -2016,6 +2208,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-zswap-noshrink",
 "ds": "64g",
 "store": "valkey",
@@ -2037,6 +2231,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-zswap-noshrink",
 "ds": "64g",
 "store": "valkey",
@@ -2058,6 +2254,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-zswap-noshrink",
 "ds": "64g",
 "store": "valkey",
@@ -2079,6 +2277,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-zswap-noshrink",
 "ds": "64g",
 "store": "valkey",
@@ -2100,6 +2300,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-zswap-noshrink",
 "ds": "64g",
 "store": "valkey",
@@ -2121,6 +2323,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-64g-zswap-noshrink",
 "ds": "64g",
 "store": "valkey",
@@ -2142,6 +2346,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2163,6 +2369,8 @@
 "disk_read_mb_s": 0.2
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2184,6 +2392,8 @@
 "disk_read_mb_s": 0.2
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2205,6 +2415,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2226,6 +2438,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2247,6 +2461,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2268,6 +2484,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2289,6 +2507,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2310,6 +2530,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2331,6 +2553,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2352,6 +2576,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2373,6 +2599,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2394,6 +2622,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2415,6 +2645,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2436,6 +2668,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2457,6 +2691,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2478,6 +2714,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2499,6 +2737,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2520,6 +2760,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2541,6 +2783,8 @@
 "disk_read_mb_s": 2.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2562,6 +2806,8 @@
 "disk_read_mb_s": 0.8
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2583,6 +2829,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2604,6 +2852,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2625,6 +2875,8 @@
 "disk_read_mb_s": 0.2
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2646,6 +2898,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 12,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2667,6 +2921,8 @@
 "disk_read_mb_s": 17.0
 },
 {
+"stall_s": 3,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2688,6 +2944,8 @@
 "disk_read_mb_s": 12.9
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2709,6 +2967,8 @@
 "disk_read_mb_s": 9.2
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2730,6 +2990,8 @@
 "disk_read_mb_s": 1.5
 },
 {
+"stall_s": 120,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2751,6 +3013,8 @@
 "disk_read_mb_s": 27.5
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-35m",
 "ds": "var40g",
 "store": "valkey",
@@ -2772,6 +3036,8 @@
 "disk_read_mb_s": 9.9
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -2793,6 +3059,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -2814,6 +3082,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -2835,6 +3105,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -2856,6 +3128,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -2877,6 +3151,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -2898,6 +3174,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -2919,6 +3197,8 @@
 "disk_read_mb_s": 0.3
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -2940,6 +3220,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -2961,6 +3243,8 @@
 "disk_read_mb_s": 1.9
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -2982,6 +3266,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -3003,6 +3289,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -3024,6 +3312,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -3045,6 +3335,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -3066,6 +3358,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -3087,6 +3381,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -3108,6 +3404,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -3129,6 +3427,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -3150,6 +3450,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -3171,6 +3473,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -3192,6 +3496,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -3213,6 +3519,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -3234,6 +3542,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -3255,6 +3565,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -3276,6 +3588,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -3297,6 +3611,8 @@
 "disk_read_mb_s": 0.2
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -3318,6 +3634,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -3339,6 +3657,8 @@
 "disk_read_mb_s": 0.1
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -3360,6 +3680,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -3381,6 +3703,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -3402,6 +3726,8 @@
 "disk_read_mb_s": 0.0
 },
 {
+"stall_s": 8,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -3423,6 +3749,8 @@
 "disk_read_mb_s": 14.3
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -3444,6 +3772,8 @@
 "disk_read_mb_s": 6.5
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -3465,6 +3795,8 @@
 "disk_read_mb_s": 4.0
 },
 {
+"stall_s": 0,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -3486,6 +3818,8 @@
 "disk_read_mb_s": 0.7
 },
 {
+"stall_s": 14,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -3507,6 +3841,8 @@
 "disk_read_mb_s": 16.6
 },
 {
+"stall_s": 1,
+"intervals": 120,
 "study": "valkey-swap-varlen-r1",
 "ds": "var30m",
 "store": "valkey",
@@ -3526,5 +3862,1661 @@
 "ratio": null,
 "zswap_wb_s": 0,
 "disk_read_mb_s": 2.9
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "40g",
+"store": "kvrocks",
+"mode": "kvrocks",
+"wl": "uniform|closed",
+"keys": 30000000,
+"ops": 91742,
+"met": null,
+"p50": 658.9,
+"p99": 3700.7,
+"p999": 5083.1,
+"faults": 0.0,
+"srv_us": 64.94,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "40g",
+"store": "kvrocks",
+"mode": "kvrocks",
+"wl": "zipfian:0.99|closed",
+"keys": 30000000,
+"ops": 146528,
+"met": null,
+"p50": 377.3,
+"p99": 1369.1,
+"p999": 4341.8,
+"faults": 0.0,
+"srv_us": 40.63,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "40g",
+"store": "kvrocks",
+"mode": "kvrocks",
+"wl": "hotspot:0.1:0.9|closed",
+"keys": 30000000,
+"ops": 104917,
+"met": null,
+"p50": 579.6,
+"p99": 3536.9,
+"p999": 4689.9,
+"faults": 0.0,
+"srv_us": 56.83,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "40g",
+"store": "kvrocks",
+"mode": "kvrocks",
+"wl": "normal:0.5:0.05|closed",
+"keys": 30000000,
+"ops": 116210,
+"met": null,
+"p50": 511.7,
+"p99": 3416.1,
+"p999": 4603.9,
+"faults": 0.0,
+"srv_us": 51.23,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "40g",
+"store": "kvrocks",
+"mode": "kvrocks",
+"wl": "uniform|rate50000",
+"keys": 30000000,
+"ops": 50000,
+"met": true,
+"p50": 113.7,
+"p99": 579.1,
+"p999": 2820.1,
+"faults": 0.0,
+"srv_us": 71.75,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "40g",
+"store": "kvrocks",
+"mode": "kvrocks",
+"wl": "zipfian:0.99|rate50000",
+"keys": 30000000,
+"ops": 50000,
+"met": true,
+"p50": 83.4,
+"p99": 185.9,
+"p999": 295.4,
+"faults": 0.0,
+"srv_us": 51.7,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1-rerun40",
+"ds": "40g",
+"store": "kvrocks",
+"mode": "kvrocks-lz4",
+"wl": "uniform|closed",
+"keys": 30000000,
+"ops": 115532,
+"met": null,
+"p50": 469.0,
+"p99": 3483.6,
+"p999": 5042.2,
+"faults": 0.0,
+"srv_us": 51.49,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1-rerun40",
+"ds": "40g",
+"store": "kvrocks",
+"mode": "kvrocks-lz4",
+"wl": "zipfian:0.99|closed",
+"keys": 30000000,
+"ops": 158890,
+"met": null,
+"p50": 366.6,
+"p99": 1689.6,
+"p999": 4436.0,
+"faults": 0.0,
+"srv_us": 37.39,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1-rerun40",
+"ds": "40g",
+"store": "kvrocks",
+"mode": "kvrocks-lz4",
+"wl": "hotspot:0.1:0.9|closed",
+"keys": 30000000,
+"ops": 125535,
+"met": null,
+"p50": 481.8,
+"p99": 3309.6,
+"p999": 4603.9,
+"faults": 0.0,
+"srv_us": 47.41,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.8
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1-rerun40",
+"ds": "40g",
+"store": "kvrocks",
+"mode": "kvrocks-lz4",
+"wl": "normal:0.5:0.05|closed",
+"keys": 30000000,
+"ops": 133882,
+"met": null,
+"p50": 462.1,
+"p99": 2848.8,
+"p999": 4505.6,
+"faults": 0.0,
+"srv_us": 44.41,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1-rerun40",
+"ds": "40g",
+"store": "kvrocks",
+"mode": "kvrocks-lz4",
+"wl": "uniform|rate50000",
+"keys": 30000000,
+"ops": 50000,
+"met": true,
+"p50": 97.6,
+"p99": 200.7,
+"p999": 556.5,
+"faults": 0.0,
+"srv_us": 57.95,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1-rerun40",
+"ds": "40g",
+"store": "kvrocks",
+"mode": "kvrocks-lz4",
+"wl": "zipfian:0.99|rate50000",
+"keys": 30000000,
+"ops": 50000,
+"met": true,
+"p50": 83.6,
+"p99": 166.7,
+"p999": 207.4,
+"faults": 0.0,
+"srv_us": 44.29,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1-rerun40",
+"ds": "40g",
+"store": "kvrocks",
+"mode": "kvrocks-zstd",
+"wl": "uniform|closed",
+"keys": 30000000,
+"ops": 87721,
+"met": null,
+"p50": 570.4,
+"p99": 3684.4,
+"p999": 5238.8,
+"faults": 0.0,
+"srv_us": 67.97,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1-rerun40",
+"ds": "40g",
+"store": "kvrocks",
+"mode": "kvrocks-zstd",
+"wl": "zipfian:0.99|closed",
+"keys": 30000000,
+"ops": 128232,
+"met": null,
+"p50": 419.3,
+"p99": 3541.0,
+"p999": 5390.3,
+"faults": 0.0,
+"srv_us": 46.19,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1-rerun40",
+"ds": "40g",
+"store": "kvrocks",
+"mode": "kvrocks-zstd",
+"wl": "hotspot:0.1:0.9|closed",
+"keys": 30000000,
+"ops": 87328,
+"met": null,
+"p50": 559.1,
+"p99": 3983.4,
+"p999": 6340.6,
+"faults": 0.0,
+"srv_us": 68.1,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1-rerun40",
+"ds": "40g",
+"store": "kvrocks",
+"mode": "kvrocks-zstd",
+"wl": "normal:0.5:0.05|closed",
+"keys": 30000000,
+"ops": 111532,
+"met": null,
+"p50": 490.5,
+"p99": 3403.8,
+"p999": 4636.7,
+"faults": 0.0,
+"srv_us": 53.43,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1-rerun40",
+"ds": "40g",
+"store": "kvrocks",
+"mode": "kvrocks-zstd",
+"wl": "uniform|rate50000",
+"keys": 30000000,
+"ops": 50000,
+"met": true,
+"p50": 128.6,
+"p99": 2205.7,
+"p999": 8138.8,
+"faults": 0.0,
+"srv_us": 79.73,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1-rerun40",
+"ds": "40g",
+"store": "kvrocks",
+"mode": "kvrocks-zstd",
+"wl": "zipfian:0.99|rate50000",
+"keys": 30000000,
+"ops": 50000,
+"met": true,
+"p50": 83.8,
+"p99": 191.1,
+"p999": 449.8,
+"faults": 0.0,
+"srv_us": 57.86,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1-rerun40",
+"ds": "40g",
+"store": "lavik",
+"mode": "lavik",
+"wl": "uniform|closed",
+"keys": 30000000,
+"ops": 75601,
+"met": null,
+"p50": 756.2,
+"p99": 3229.7,
+"p999": 4788.2,
+"faults": 0.0,
+"srv_us": 50.81,
+"used_gb": 2.0,
+"rss_gb": 2.0,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 352.7
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1-rerun40",
+"ds": "40g",
+"store": "lavik",
+"mode": "lavik",
+"wl": "zipfian:0.99|closed",
+"keys": 30000000,
+"ops": 77579,
+"met": null,
+"p50": 728.1,
+"p99": 3823.6,
+"p999": 5787.6,
+"faults": 0.0,
+"srv_us": 46.78,
+"used_gb": 2.0,
+"rss_gb": 2.0,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 294.5
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1-rerun40",
+"ds": "40g",
+"store": "lavik",
+"mode": "lavik",
+"wl": "hotspot:0.1:0.9|closed",
+"keys": 30000000,
+"ops": 69424,
+"met": null,
+"p50": 781.8,
+"p99": 3768.3,
+"p999": 6103.0,
+"faults": 0.0,
+"srv_us": 51.11,
+"used_gb": 2.0,
+"rss_gb": 2.0,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 330.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1-rerun40",
+"ds": "40g",
+"store": "lavik",
+"mode": "lavik",
+"wl": "normal:0.5:0.05|closed",
+"keys": 30000000,
+"ops": 74157,
+"met": null,
+"p50": 766.0,
+"p99": 3289.1,
+"p999": 4735.0,
+"faults": 0.0,
+"srv_us": 50.88,
+"used_gb": 2.0,
+"rss_gb": 2.0,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 346.7
+},
+{
+"stall_s": 14,
+"intervals": 120,
+"study": "stores-r1-rerun40",
+"ds": "40g",
+"store": "lavik",
+"mode": "lavik",
+"wl": "uniform|rate50000",
+"keys": 30000000,
+"ops": 50000,
+"met": true,
+"p50": 270.8,
+"p99": 98762.8,
+"p999": 251527.2,
+"faults": 0.0,
+"srv_us": 63.66,
+"used_gb": 2.0,
+"rss_gb": 2.0,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 238.7
+},
+{
+"stall_s": 3,
+"intervals": 120,
+"study": "stores-r1-rerun40",
+"ds": "40g",
+"store": "lavik",
+"mode": "lavik",
+"wl": "zipfian:0.99|rate50000",
+"keys": 30000000,
+"ops": 50000,
+"met": true,
+"p50": 239.9,
+"p99": 42631.2,
+"p999": 104267.8,
+"faults": 0.0,
+"srv_us": 66.51,
+"used_gb": 2.0,
+"rss_gb": 2.0,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 194.9
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "64g",
+"store": "kvrocks",
+"mode": "kvrocks",
+"wl": "uniform|closed",
+"keys": 48000000,
+"ops": 88207,
+"met": null,
+"p50": 708.1,
+"p99": 3872.8,
+"p999": 5816.3,
+"faults": 0.0,
+"srv_us": 67.48,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "64g",
+"store": "kvrocks",
+"mode": "kvrocks",
+"wl": "zipfian:0.99|closed",
+"keys": 48000000,
+"ops": 137870,
+"met": null,
+"p50": 378.1,
+"p99": 2541.6,
+"p999": 5169.2,
+"faults": 0.0,
+"srv_us": 42.63,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.6
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "64g",
+"store": "kvrocks",
+"mode": "kvrocks",
+"wl": "hotspot:0.1:0.9|closed",
+"keys": 48000000,
+"ops": 95473,
+"met": null,
+"p50": 603.1,
+"p99": 3643.4,
+"p999": 4804.6,
+"faults": 0.0,
+"srv_us": 62.3,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "64g",
+"store": "kvrocks",
+"mode": "kvrocks",
+"wl": "normal:0.5:0.05|closed",
+"keys": 48000000,
+"ops": 105563,
+"met": null,
+"p50": 555.0,
+"p99": 3491.8,
+"p999": 4710.4,
+"faults": 0.0,
+"srv_us": 56.46,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "64g",
+"store": "kvrocks",
+"mode": "kvrocks",
+"wl": "uniform|rate50000",
+"keys": 48000000,
+"ops": 50000,
+"met": true,
+"p50": 118.3,
+"p99": 1869.8,
+"p999": 7028.7,
+"faults": 0.0,
+"srv_us": 73.98,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "64g",
+"store": "kvrocks",
+"mode": "kvrocks",
+"wl": "zipfian:0.99|rate50000",
+"keys": 48000000,
+"ops": 50000,
+"met": true,
+"p50": 97.3,
+"p99": 230.4,
+"p999": 566.8,
+"faults": 0.0,
+"srv_us": 54.94,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "64g",
+"store": "kvrocks",
+"mode": "kvrocks-lz4",
+"wl": "uniform|closed",
+"keys": 48000000,
+"ops": 114115,
+"met": null,
+"p50": 564.2,
+"p99": 3426.3,
+"p999": 4857.9,
+"faults": 0.0,
+"srv_us": 52.21,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "64g",
+"store": "kvrocks",
+"mode": "kvrocks-lz4",
+"wl": "zipfian:0.99|closed",
+"keys": 48000000,
+"ops": 157902,
+"met": null,
+"p50": 364.0,
+"p99": 1418.2,
+"p999": 4337.7,
+"faults": 0.0,
+"srv_us": 37.6,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "64g",
+"store": "kvrocks",
+"mode": "kvrocks-lz4",
+"wl": "hotspot:0.1:0.9|closed",
+"keys": 48000000,
+"ops": 115826,
+"met": null,
+"p50": 522.0,
+"p99": 3424.3,
+"p999": 9207.8,
+"faults": 0.0,
+"srv_us": 49.34,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 3.5
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "64g",
+"store": "kvrocks",
+"mode": "kvrocks-lz4",
+"wl": "normal:0.5:0.05|closed",
+"keys": 48000000,
+"ops": 125444,
+"met": null,
+"p50": 488.2,
+"p99": 3375.1,
+"p999": 4542.5,
+"faults": 0.0,
+"srv_us": 47.4,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "64g",
+"store": "kvrocks",
+"mode": "kvrocks-lz4",
+"wl": "uniform|rate50000",
+"keys": 48000000,
+"ops": 50000,
+"met": true,
+"p50": 99.5,
+"p99": 191.0,
+"p999": 906.2,
+"faults": 0.0,
+"srv_us": 59.42,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "64g",
+"store": "kvrocks",
+"mode": "kvrocks-lz4",
+"wl": "zipfian:0.99|rate50000",
+"keys": 48000000,
+"ops": 50000,
+"met": true,
+"p50": 84.9,
+"p99": 165.6,
+"p999": 210.3,
+"faults": 0.0,
+"srv_us": 45.29,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "64g",
+"store": "kvrocks",
+"mode": "kvrocks-zstd",
+"wl": "uniform|closed",
+"keys": 48000000,
+"ops": 86138,
+"met": null,
+"p50": 671.2,
+"p99": 3719.2,
+"p999": 4759.6,
+"faults": 0.0,
+"srv_us": 69.27,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.2
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "64g",
+"store": "kvrocks",
+"mode": "kvrocks-zstd",
+"wl": "zipfian:0.99|closed",
+"keys": 48000000,
+"ops": 120604,
+"met": null,
+"p50": 435.5,
+"p99": 3631.1,
+"p999": 5599.2,
+"faults": 0.0,
+"srv_us": 49.14,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "64g",
+"store": "kvrocks",
+"mode": "kvrocks-zstd",
+"wl": "hotspot:0.1:0.9|closed",
+"keys": 48000000,
+"ops": 77711,
+"met": null,
+"p50": 626.2,
+"p99": 4048.9,
+"p999": 6856.7,
+"faults": 0.0,
+"srv_us": 76.53,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "64g",
+"store": "kvrocks",
+"mode": "kvrocks-zstd",
+"wl": "normal:0.5:0.05|closed",
+"keys": 48000000,
+"ops": 93874,
+"met": null,
+"p50": 618.5,
+"p99": 3749.9,
+"p999": 5455.9,
+"faults": 0.0,
+"srv_us": 63.38,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "64g",
+"store": "kvrocks",
+"mode": "kvrocks-zstd",
+"wl": "uniform|rate50000",
+"keys": 48000000,
+"ops": 50000,
+"met": true,
+"p50": 133.9,
+"p99": 2142.2,
+"p999": 8921.1,
+"faults": 0.0,
+"srv_us": 79.39,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "64g",
+"store": "kvrocks",
+"mode": "kvrocks-zstd",
+"wl": "zipfian:0.99|rate50000",
+"keys": 48000000,
+"ops": 50000,
+"met": true,
+"p50": 86.5,
+"p99": 200.3,
+"p999": 3043.3,
+"faults": 0.0,
+"srv_us": 51.9,
+"used_gb": null,
+"rss_gb": 5.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.1
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "64g",
+"store": "lavik",
+"mode": "lavik",
+"wl": "uniform|closed",
+"keys": 48000000,
+"ops": 76802,
+"met": null,
+"p50": 745.5,
+"p99": 3188.7,
+"p999": 4546.6,
+"faults": 0.0,
+"srv_us": 50.67,
+"used_gb": 2.9,
+"rss_gb": 2.8,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 358.4
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "64g",
+"store": "lavik",
+"mode": "lavik",
+"wl": "zipfian:0.99|closed",
+"keys": 48000000,
+"ops": 79199,
+"met": null,
+"p50": 717.3,
+"p99": 3723.3,
+"p999": 5521.4,
+"faults": 0.0,
+"srv_us": 46.72,
+"used_gb": 2.9,
+"rss_gb": 2.8,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 302.1
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "64g",
+"store": "lavik",
+"mode": "lavik",
+"wl": "hotspot:0.1:0.9|closed",
+"keys": 48000000,
+"ops": 75328,
+"met": null,
+"p50": 758.8,
+"p99": 3416.1,
+"p999": 4812.8,
+"faults": 0.0,
+"srv_us": 50.76,
+"used_gb": 2.9,
+"rss_gb": 2.8,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 352.2
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "64g",
+"store": "lavik",
+"mode": "lavik",
+"wl": "normal:0.5:0.05|closed",
+"keys": 48000000,
+"ops": 75889,
+"met": null,
+"p50": 754.2,
+"p99": 3287.0,
+"p999": 4739.1,
+"faults": 0.0,
+"srv_us": 50.72,
+"used_gb": 2.9,
+"rss_gb": 2.8,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 354.6
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "64g",
+"store": "lavik",
+"mode": "lavik",
+"wl": "uniform|rate50000",
+"keys": 48000000,
+"ops": 50000,
+"met": true,
+"p50": 237.8,
+"p99": 10690.6,
+"p999": 50724.9,
+"faults": 0.0,
+"srv_us": 68.9,
+"used_gb": 2.9,
+"rss_gb": 2.8,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 233.8
+},
+{
+"stall_s": 1,
+"intervals": 120,
+"study": "stores-r1",
+"ds": "64g",
+"store": "lavik",
+"mode": "lavik",
+"wl": "zipfian:0.99|rate50000",
+"keys": 48000000,
+"ops": 50000,
+"met": true,
+"p50": 243.1,
+"p99": 35225.6,
+"p999": 67371.0,
+"faults": 0.0,
+"srv_us": 63.2,
+"used_gb": 2.9,
+"rss_gb": 2.8,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 194.7
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-tideskv",
+"ds": "40g",
+"store": "tideskv",
+"mode": "tideskv-nosync",
+"wl": "uniform|closed",
+"keys": 30000000,
+"ops": 217433,
+"met": null,
+"p50": 291.8,
+"p99": 348.9,
+"p999": 996.4,
+"faults": 0.0,
+"srv_us": 27.53,
+"used_gb": null,
+"rss_gb": 8.7,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-tideskv",
+"ds": "40g",
+"store": "tideskv",
+"mode": "tideskv-nosync",
+"wl": "zipfian:0.99|closed",
+"keys": 30000000,
+"ops": 230006,
+"met": null,
+"p50": 277.5,
+"p99": 334.6,
+"p999": 419.8,
+"faults": 0.0,
+"srv_us": 25.97,
+"used_gb": null,
+"rss_gb": 11.6,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 12,
+"intervals": 120,
+"study": "stores-tideskv",
+"ds": "40g",
+"store": "tideskv",
+"mode": "tideskv-nosync",
+"wl": "hotspot:0.1:0.9|closed",
+"keys": 30000000,
+"ops": 162560,
+"met": null,
+"p50": 295.2,
+"p99": 1718.3,
+"p999": 4304.9,
+"faults": 0.0,
+"srv_us": 31.3,
+"used_gb": null,
+"rss_gb": 11.6,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 5.3
+},
+{
+"stall_s": 6,
+"intervals": 120,
+"study": "stores-tideskv",
+"ds": "40g",
+"store": "tideskv",
+"mode": "tideskv-nosync",
+"wl": "normal:0.5:0.05|closed",
+"keys": 30000000,
+"ops": 201940,
+"met": null,
+"p50": 286.7,
+"p99": 745.5,
+"p999": 3313.7,
+"faults": 0.0,
+"srv_us": 28.14,
+"used_gb": null,
+"rss_gb": 11.6,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 11,
+"intervals": 120,
+"study": "stores-tideskv",
+"ds": "40g",
+"store": "tideskv",
+"mode": "tideskv-nosync",
+"wl": "uniform|rate50000",
+"keys": 30000000,
+"ops": 50000,
+"met": true,
+"p50": 51.9,
+"p99": 7801405.4,
+"p999": 8640266.2,
+"faults": 0.0,
+"srv_us": 45.94,
+"used_gb": null,
+"rss_gb": 11.5,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-tideskv",
+"ds": "40g",
+"store": "tideskv",
+"mode": "tideskv-nosync",
+"wl": "zipfian:0.99|rate50000",
+"keys": 30000000,
+"ops": 50000,
+"met": true,
+"p50": 47.5,
+"p99": 104.3,
+"p999": 118.7,
+"faults": 0.0,
+"srv_us": 35.13,
+"used_gb": null,
+"rss_gb": 11.6,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 2,
+"intervals": 120,
+"study": "stores-tideskv",
+"ds": "40g",
+"store": "tideskv",
+"mode": "tideskv-zstd-nosync",
+"wl": "uniform|closed",
+"keys": 30000000,
+"ops": 165055,
+"met": null,
+"p50": 348.4,
+"p99": 1437.7,
+"p999": 4235.3,
+"faults": 0.0,
+"srv_us": 35.33,
+"used_gb": null,
+"rss_gb": 8.4,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 1,
+"intervals": 120,
+"study": "stores-tideskv",
+"ds": "40g",
+"store": "tideskv",
+"mode": "tideskv-zstd-nosync",
+"wl": "zipfian:0.99|closed",
+"keys": 30000000,
+"ops": 148295,
+"met": null,
+"p50": 344.3,
+"p99": 1964.0,
+"p999": 3811.3,
+"faults": 0.0,
+"srv_us": 36.14,
+"used_gb": null,
+"rss_gb": 8.3,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 1,
+"intervals": 120,
+"study": "stores-tideskv",
+"ds": "40g",
+"store": "tideskv",
+"mode": "tideskv-zstd-nosync",
+"wl": "hotspot:0.1:0.9|closed",
+"keys": 30000000,
+"ops": 177695,
+"met": null,
+"p50": 345.1,
+"p99": 419.6,
+"p999": 1427.5,
+"faults": 0.0,
+"srv_us": 32.8,
+"used_gb": null,
+"rss_gb": 11.6,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-tideskv",
+"ds": "40g",
+"store": "tideskv",
+"mode": "tideskv-zstd-nosync",
+"wl": "normal:0.5:0.05|closed",
+"keys": 30000000,
+"ops": 176650,
+"met": null,
+"p50": 344.1,
+"p99": 817.7,
+"p999": 3665.9,
+"faults": 0.0,
+"srv_us": 33.54,
+"used_gb": null,
+"rss_gb": 11.6,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-tideskv",
+"ds": "40g",
+"store": "tideskv",
+"mode": "tideskv-zstd-nosync",
+"wl": "uniform|rate50000",
+"keys": 30000000,
+"ops": 50000,
+"met": true,
+"p50": 58.3,
+"p99": 130.9,
+"p999": 155.3,
+"faults": 0.0,
+"srv_us": 39.21,
+"used_gb": null,
+"rss_gb": 11.6,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-tideskv",
+"ds": "40g",
+"store": "tideskv",
+"mode": "tideskv-zstd-nosync",
+"wl": "zipfian:0.99|rate50000",
+"keys": 30000000,
+"ops": 50000,
+"met": true,
+"p50": 69.4,
+"p99": 141.7,
+"p999": 177.2,
+"faults": 0.0,
+"srv_us": 36.62,
+"used_gb": null,
+"rss_gb": 11.6,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 2,
+"intervals": 120,
+"study": "stores-tideskv",
+"ds": "64g",
+"store": "tideskv",
+"mode": "tideskv-nosync",
+"wl": "uniform|closed",
+"keys": 48000000,
+"ops": 129652,
+"met": null,
+"p50": 435.2,
+"p99": 1236.0,
+"p999": 5980.2,
+"faults": 0.0,
+"srv_us": 32.82,
+"used_gb": null,
+"rss_gb": 12.1,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 67.4
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-tideskv",
+"ds": "64g",
+"store": "tideskv",
+"mode": "tideskv-nosync",
+"wl": "zipfian:0.99|closed",
+"keys": 48000000,
+"ops": 188920,
+"met": null,
+"p50": 291.3,
+"p99": 720.9,
+"p999": 2189.3,
+"faults": 0.0,
+"srv_us": 26.15,
+"used_gb": null,
+"rss_gb": 12.1,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 36.3
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-tideskv",
+"ds": "64g",
+"store": "tideskv",
+"mode": "tideskv-nosync",
+"wl": "hotspot:0.1:0.9|closed",
+"keys": 48000000,
+"ops": 176075,
+"met": null,
+"p50": 309.5,
+"p99": 789.0,
+"p999": 2304.0,
+"faults": 0.0,
+"srv_us": 27.63,
+"used_gb": null,
+"rss_gb": 12.2,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 39.6
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-tideskv",
+"ds": "64g",
+"store": "tideskv",
+"mode": "tideskv-nosync",
+"wl": "normal:0.5:0.05|closed",
+"keys": 48000000,
+"ops": 198069,
+"met": null,
+"p50": 298.8,
+"p99": 753.2,
+"p999": 2928.6,
+"faults": 0.0,
+"srv_us": 28.62,
+"used_gb": null,
+"rss_gb": 12.2,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 13.2
+},
+{
+"stall_s": 6,
+"intervals": 120,
+"study": "stores-tideskv",
+"ds": "64g",
+"store": "tideskv",
+"mode": "tideskv-nosync",
+"wl": "uniform|rate50000",
+"keys": 48000000,
+"ops": 50000,
+"met": true,
+"p50": 221.8,
+"p99": 89784.3,
+"p999": 386924.5,
+"faults": 0.0,
+"srv_us": 37.77,
+"used_gb": null,
+"rss_gb": 12.1,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 101.3
+},
+{
+"stall_s": 3,
+"intervals": 120,
+"study": "stores-tideskv",
+"ds": "64g",
+"store": "tideskv",
+"mode": "tideskv-nosync",
+"wl": "zipfian:0.99|rate50000",
+"keys": 48000000,
+"ops": 50000,
+"met": true,
+"p50": 58.9,
+"p99": 390.1,
+"p999": 58884.1,
+"faults": 0.0,
+"srv_us": 34.66,
+"used_gb": null,
+"rss_gb": 12.2,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 29.5
+},
+{
+"stall_s": 7,
+"intervals": 120,
+"study": "stores-tideskv",
+"ds": "64g",
+"store": "tideskv",
+"mode": "tideskv-zstd-nosync",
+"wl": "uniform|closed",
+"keys": 48000000,
+"ops": 141699,
+"met": null,
+"p50": 354.8,
+"p99": 2400.3,
+"p999": 4763.6,
+"faults": 0.0,
+"srv_us": 39.81,
+"used_gb": null,
+"rss_gb": 12.0,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-tideskv",
+"ds": "64g",
+"store": "tideskv",
+"mode": "tideskv-zstd-nosync",
+"wl": "zipfian:0.99|closed",
+"keys": 48000000,
+"ops": 187140,
+"met": null,
+"p50": 337.7,
+"p99": 424.4,
+"p999": 1369.1,
+"faults": 0.0,
+"srv_us": 31.83,
+"used_gb": null,
+"rss_gb": 12.0,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 0.0
+},
+{
+"stall_s": 5,
+"intervals": 120,
+"study": "stores-tideskv",
+"ds": "64g",
+"store": "tideskv",
+"mode": "tideskv-zstd-nosync",
+"wl": "hotspot:0.1:0.9|closed",
+"keys": 48000000,
+"ops": 129589,
+"met": null,
+"p50": 367.1,
+"p99": 3362.8,
+"p999": 4857.9,
+"faults": 0.0,
+"srv_us": 42.29,
+"used_gb": null,
+"rss_gb": 12.0,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 1.0
+},
+{
+"stall_s": 4,
+"intervals": 120,
+"study": "stores-tideskv",
+"ds": "64g",
+"store": "tideskv",
+"mode": "tideskv-zstd-nosync",
+"wl": "normal:0.5:0.05|closed",
+"keys": 48000000,
+"ops": 156842,
+"met": null,
+"p50": 346.4,
+"p99": 1893.4,
+"p999": 4325.4,
+"faults": 0.0,
+"srv_us": 35.98,
+"used_gb": null,
+"rss_gb": 12.0,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 2.8
+},
+{
+"stall_s": 0,
+"intervals": 120,
+"study": "stores-tideskv",
+"ds": "64g",
+"store": "tideskv",
+"mode": "tideskv-zstd-nosync",
+"wl": "uniform|rate50000",
+"keys": 48000000,
+"ops": 50000,
+"met": true,
+"p50": 54.4,
+"p99": 236.0,
+"p999": 1709.1,
+"faults": 0.0,
+"srv_us": 40.67,
+"used_gb": null,
+"rss_gb": 12.0,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 5.2
+},
+{
+"stall_s": 11,
+"intervals": 120,
+"study": "stores-tideskv",
+"ds": "64g",
+"store": "tideskv",
+"mode": "tideskv-zstd-nosync",
+"wl": "zipfian:0.99|rate50000",
+"keys": 48000000,
+"ops": 50000,
+"met": true,
+"p50": 60.9,
+"p99": 3837788.2,
+"p999": 4605345.8,
+"faults": 0.0,
+"srv_us": 55.65,
+"used_gb": null,
+"rss_gb": 11.9,
+"swap_gb": 0.0,
+"ratio": null,
+"zswap_wb_s": 0,
+"disk_read_mb_s": 10.9
 }
 ]

@@ -24,6 +24,9 @@ fit, the kernel swaps pages out: to compressed RAM (zram, or zswap in front of a
   the shrinker off) and zswap-lz4 to 65k (82k off; zram 84k). See [the zswap shrinker](#the-zswap-shrinker).
 * **Disk swap stalls Valkey.** Its single thread waits for each page read: 11k ops/s with uniform access at 40 GB
   and 5k at 64 GB, versus 107k / 84k with zram-lz4. It cannot hold 50k ops/s with uniform access at either size.
+* **Stores that keep data on SSD:** Kvrocks with lz4 gets more throughput than Valkey with zram on uniform and zipfian access but
+  uses 4-7x more CPU per operation and has higher tail latency; TidesKV is faster still but stalls for 5-10 s at a time;
+  Lavik is limited by this host's SATA SSDs. See [Kvrocks, Lavik and TidesKV](#kvrocks-lavik-and-tideskv).
 * **Variable value sizes (0-2000 B) use 14% less memory than fixed 1 KiB values** (jemalloc puts 1 KiB + header
   in the 1280-byte size class) and, at the same memory size, cause ~25% fewer page faults per operation than
   fixed values (likely because pages full of small values are hotter and stay resident; not verified).
@@ -174,7 +177,55 @@ Disk swap at a fixed rate: latency capped at the 60 s histogram limit when the t
 * zswap zstd 3 at 64 GB with the shrinker off, uniform @ 50k ops/s (p99 537 µs vs 165 µs for zram zstd 3) and the
   variable-length 35M-key zswap zstd uniform @ 50k ops/s point (207 µs) are single outliers not yet explained.
 
-## Kvrocks and Lavik
+## Kvrocks, Lavik and TidesKV
 
-In progress: the same data sets on Kvrocks 2.17 (shipped configuration, and with lz4 / zstd compression) and
-Lavik 0.3.2. Note that Lavik is designed for NVMe; this host has SATA SSDs.
+The same data sets (30M / 48M keys x 1 KiB, 10% random) on stores that keep data on SSD and use RAM as a cache, each on the
+same 6 server CPUs, no swap. Versions: Kvrocks 2.17.0, Lavik 0.3.2 (release binary), TidesKV 0.1.0 (commit `c598261`).
+
+* **Kvrocks with lz4** compresses its files enough that they stay in the page cache even at 64 GB (SSD reads 0-3 MB/s), so it is
+  CPU-bound, not I/O-bound. It gets more throughput than Valkey with zram on uniform (+8% at 40 GB, +36% at 64 GB) and zipfian access,
+  but uses 4-7x more server CPU per operation (spread over its threads; Valkey uses one) and has higher tail latency (p99.9 at
+  50k ops/s with uniform access 0.6-0.9 ms vs 0.2 ms). With hot spots Valkey with zram is faster. lz4 is better than both the shipped
+  configuration (snappy from LSM level 2) and zstd on every workload; Kvrocks's tail latency varied a lot between the two 40 GB runs.
+* **Lavik** reads every GET from the SSD and is capped at 69-79k ops/s by this host's SATA SSDs (~350 MB/s of reads), with p99
+  latency of tens of milliseconds at 50k ops/s. It is designed for NVMe; this host does not show it at its best.
+* **TidesKV** is the fastest store between stalls (217k ops/s uniform at 40 GB with p99 0.3 ms; 130-198k at 64 GB) with 26-40 µs
+  of CPU per operation. In about half the runs it **stalls for 5-10 seconds**: throughput falls to 1-13% of normal for all requests,
+  disk writes stop, then the backlog clears in a burst with a write burst of 240-310 MB/s. "Stall seconds" counts the measured seconds
+  in which a request waited more than 100 ms. TidesKV ran with `sync-mode none`: its default `interval` mode committed at about
+  the disk's sync rate here (~650 SET/s on this host; on a scratch VM 0.9k SET/s vs 9k with `none`, single connection), and
+  `none` acknowledges a write before it leaves process memory, which is weaker durability than Kvrocks's default (WAL written,
+  not fsynced). Why `interval` commits that slowly is not understood: in the source it does not fsync the WAL per commit.
+* **Valkey with zram had no stalls in any run.**
+
+Non-default settings: Kvrocks starts from its shipped `kvrocks.conf` with bind/port/dir/log-dir and `workers 6` changed (variants
+set `rocksdb.compression lz4|zstd`); TidesKV defaults with bind/port/dir, `workers 6`, `sync-mode none` (variant `compression zstd`);
+Lavik defaults with `--threads 6 --pin-workers --cpus 1,2,3,7,8,9` and a 300 GB data file. The 40 GB Kvrocks lz4 / zstd and Lavik
+results are from a rerun (`data/stores-r1-rerun40`): the first run overlapped other work on the benchmark host.
+
+### Stores, 40 GB: throughput at full load (ops/s), latency at 50k ops/s, CPU, stalls
+
+| workload | Valkey + zram lz4 | Kvrocks shipped (snappy) | Kvrocks lz4 | Kvrocks zstd | Lavik | TidesKV lz4, sync none | TidesKV zstd, sync none |
+|---|---|---|---|---|---|---|---|
+| uniform | 107.2k | 91.7k | 115.5k | 87.7k | 75.6k | 217.4k | 165.1k |
+| zipfian 0.99 | 138.5k | 146.5k | 158.9k | 128.2k | 77.6k | 230.0k | 148.3k |
+| hotspot 10%/90% | 140.4k | 104.9k | 125.5k | 87.3k | 69.4k | 162.6k | 177.7k |
+| normal (sd 5%) | 146.7k | 116.2k | 133.9k | 111.5k | 74.2k | 201.9k | 176.7k |
+| uniform @ 50k ops/s p99 / p99.9 µs | 99 / 205 | 579 / 2820 | 201 / 556 | 2206 / 8139 | 98763 / 251527 | 7801405 / 8640266 | 131 / 155 |
+| zipfian @ 50k ops/s p99 / p99.9 µs | 70 / 110 | 186 / 295 | 167 / 207 | 191 / 450 | 42631 / 104268 | 104 / 119 | 142 / 177 |
+| server CPU µs/op (uniform) | 9.3 | 64.9 | 51.5 | 68.0 | 50.8 | 27.5 | 35.3 |
+| stall seconds, all 6 points | 0 | 0 | 0 | 0 | 17 | 29 | 4 |
+
+### Stores, 64 GB: throughput at full load (ops/s), latency at 50k ops/s, CPU, stalls
+
+| workload | Valkey + zram lz4 | Kvrocks shipped (snappy) | Kvrocks lz4 | Kvrocks zstd | Lavik | TidesKV lz4, sync none | TidesKV zstd, sync none |
+|---|---|---|---|---|---|---|---|
+| uniform | 83.7k | 88.2k | 114.1k | 86.1k | 76.8k | 129.7k | 141.7k |
+| zipfian 0.99 | 126.0k | 137.9k | 157.9k | 120.6k | 79.2k | 188.9k | 187.1k |
+| hotspot 10%/90% | 133.2k | 95.5k | 115.8k | 77.7k | 75.3k | 176.1k | 129.6k |
+| normal (sd 5%) | 140.6k | 105.6k | 125.4k | 93.9k | 75.9k | 198.1k | 156.8k |
+| uniform @ 50k ops/s p99 / p99.9 µs | 103 / 242 | 1870 / 7029 | 191 / 906 | 2142 / 8921 | 10691 / 50725 | 89784 / 386924 | 236 / 1709 |
+| zipfian @ 50k ops/s p99 / p99.9 µs | 76 / 141 | 230 / 567 | 166 / 210 | 200 / 3043 | 35226 / 67371 | 390 / 58884 | 3837788 / 4605346 |
+| server CPU µs/op (uniform) | 11.9 | 67.5 | 52.2 | 69.3 | 50.7 | 32.8 | 39.8 |
+| stall seconds, all 6 points | 0 | 0 | 0 | 0 | 1 | 11 | 27 |
+

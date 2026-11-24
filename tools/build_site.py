@@ -17,15 +17,35 @@ STUDIES = [
     ("valkey-swap-varlen-35m", "var40g", None),
     ("valkey-swap-varlen-r1", "var30m", None),
 ]
-STORES = [("stores-r1", None, None)]
+# later entries replace earlier ones for the same (data set, mode, workload): the 40 GB reruns replace the stores-r1
+# groups that overlapped side work on the benchmark host
+STORES = [("stores-r1", None, None), ("stores-r1-rerun40", None, None), ("stores-tideskv", None, None)]
+
+
+def stalls(study):
+    """seconds (measured 1 s intervals) in which some request waited more than 100 ms, per label"""
+    out = {}
+    p = os.path.join(DATA, study, "intervals.jsonl")
+    if not os.path.exists(p):
+        return out
+    for line in open(p):
+        r = json.loads(line)
+        if r.get("type") != "interval" or r.get("phase") != "measure":
+            continue
+        d = out.setdefault(r["label"], [0, 0])
+        d[1] += 1
+        if r.get("max_us", 0) > 100_000:
+            d[0] += 1
+    return out
 
 
 def rows():
-    out = []
+    out = {}
     for study, ds, tag in STUDIES + STORES:
         p = os.path.join(DATA, study, "results.jsonl")
         if not os.path.exists(p):
             continue
+        st = stalls(study)
         for line in open(p):
             r = json.loads(line)
             s = r["summary"]
@@ -48,7 +68,9 @@ def rows():
                 ratio = sy["zram0_orig_bytes"] / sy["zram0_compr_bytes"]
             elif sy.get("Zswap_kb"):
                 ratio = sy["Zswapped_kb"] / sy["Zswap_kb"]
-            out.append({
+            sd = st.get(r["label"], [0, 0])
+            out[(dset, store, mode, wl)] = {
+                "stall_s": sd[0], "intervals": sd[1],
                 "study": study, "ds": dset, "store": store, "mode": mode, "wl": wl, "keys": int(label[2]),
                 "ops": round(s["ops_s"]), "met": s.get("target_rate_met"),
                 "p50": round(L["p50_us"], 1), "p99": round(L["p99_us"], 1), "p999": round(L["p999_us"], 1),
@@ -60,8 +82,8 @@ def rows():
                 "ratio": round(ratio, 2) if ratio else None,
                 "zswap_wb_s": round(sy.get("zswap_writeback_s", 0)),
                 "disk_read_mb_s": round(sy.get("disk_read_mb_s", 0), 1),
-            })
-    return out
+            }
+    return list(out.values())
 
 
 def main():

@@ -122,5 +122,43 @@ def main():
     print("\n".join(out))
 
 
+
+
+def stores_section():
+    """Store comparison tables, from the same merged rows the web page uses (40 GB reruns replace overlapped runs)."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import build_site
+    rows = build_site.rows()
+    names = [("valkey:zram-lz4", "Valkey + zram lz4"), ("kvrocks", "Kvrocks shipped (snappy)"), ("kvrocks-lz4", "Kvrocks lz4"),
+             ("kvrocks-zstd", "Kvrocks zstd"), ("lavik", "Lavik"), ("tideskv-nosync", "TidesKV lz4, sync none"),
+             ("tideskv-zstd-nosync", "TidesKV zstd, sync none")]
+
+    def get(ds, mode, wl):
+        if mode.startswith("valkey:"):
+            m = mode[7:]
+            return next((r for r in rows if r["ds"] == ds and r["mode"] == m and r["wl"] == wl and r["store"] == "valkey"), None)
+        return next((r for r in rows if r["ds"] == ds and r["mode"] == mode and r["wl"] == wl and r["store"] != "valkey"), None)
+
+    out = []
+    for ds, dsl in (("40g", "40 GB"), ("64g", "64 GB")):
+        tr = []
+        for wl in WL_CLOSED:
+            tr.append([WL_NAME[wl]] + [(f"{r['ops']/1000:.1f}k" if r else "") for r in (get(ds, m, wl) for m, _ in names)])
+        for wl in WL_RATE:
+            cells = []
+            for m, _ in names:
+                r = get(ds, m, wl)
+                cells.append("" if not r else (f"{r['p99']:.0f} / {r['p999']:.0f}" if r["met"] else f"missed ({r['ops']/1000:.1f}k)"))
+            tr.append([WL_NAME[wl] + " p99 / p99.9 µs"] + cells)
+        tr.append(["server CPU µs/op (uniform)"] + [(f"{r['srv_us']:.1f}" if r else "") for r in (get(ds, m, "uniform|closed") for m, _ in names)])
+        tr.append(["stall seconds, all 6 points"] + [str(sum((get(ds, m, wl) or {}).get("stall_s", 0) for wl in WL_CLOSED + WL_RATE)) for m, _ in names])
+        out.append(table(f"Stores, {dsl}: throughput at full load (ops/s), latency at 50k ops/s, CPU, stalls",
+                         ["workload"] + [n for _, n in names], tr))
+    return "\n".join(out)
+
+
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1 and sys.argv[1] == "stores":
+        print(stores_section())
+    else:
+        main()
