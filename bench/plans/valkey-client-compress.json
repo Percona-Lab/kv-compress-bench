@@ -11,9 +11,8 @@
   {
    "name": "valkey-client-lz4",
    "store": "valkey",
-   "swap": "zram-lz4",
+   "swap": "disk",
    "env": {
-    "ZRAM_GB": 96,
     "SWAP_GB": 96
    },
    "data": {
@@ -48,9 +47,8 @@
   {
    "name": "valkey-client-zstd:-1",
    "store": "valkey",
-   "swap": "zram-lz4",
+   "swap": "disk",
    "env": {
-    "ZRAM_GB": 96,
     "SWAP_GB": 96
    },
    "data": {
@@ -85,9 +83,8 @@
   {
    "name": "valkey-client-zstd:3",
    "store": "valkey",
-   "swap": "zram-lz4",
+   "swap": "disk",
    "env": {
-    "ZRAM_GB": 96,
     "SWAP_GB": 96
    },
    "data": {
@@ -122,9 +119,8 @@
   {
    "name": "valkey-client-lz4",
    "store": "valkey",
-   "swap": "zram-lz4",
+   "swap": "disk",
    "env": {
-    "ZRAM_GB": 96,
     "SWAP_GB": 96
    },
    "data": {
@@ -159,9 +155,8 @@
   {
    "name": "valkey-client-zstd:-1",
    "store": "valkey",
-   "swap": "zram-lz4",
+   "swap": "disk",
    "env": {
-    "ZRAM_GB": 96,
     "SWAP_GB": 96
    },
    "data": {
@@ -196,9 +191,8 @@
   {
    "name": "valkey-client-zstd:3",
    "store": "valkey",
-   "swap": "zram-lz4",
+   "swap": "disk",
    "env": {
-    "ZRAM_GB": 96,
     "SWAP_GB": 96
    },
    "data": {
