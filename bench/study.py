@@ -92,7 +92,7 @@ def run_point(out, gi, pi, g, p, dflt):
     o.update(g.get("point_defaults", {}))
     o.update(p)
     settled = settle(out, gi, pi, g, o)
-    label = f"{g['store']}|{g['swap']}|{g['data']['keys']}|{o.get('key_dist','uniform')}|{'rate'+str(o['rate']) if o.get('rate') else 'closed'}"
+    label = f"{g.get('name', g['store'])}|{g['swap']}|{g['data']['keys']}|{o.get('key_dist','uniform')}|{'rate'+str(o['rate']) if o.get('rate') else 'closed'}"
     if o.get("tag"):
         label += "|" + o["tag"]
     pid = sh(f"{KVCTL} pid", capture=True).strip()
@@ -112,7 +112,7 @@ def run_point(out, gi, pi, g, p, dflt):
         summ = json.loads(r.stdout)
     except json.JSONDecodeError:
         summ = {"error": "no summary", "stderr": r.stderr[-4000:]}
-    rec = {"type": "point", "study": out, "group": gi, "point": pi, "store": g["store"], "swap": g["swap"],
+    rec = {"type": "point", "study": out, "group": gi, "point": pi, "store": g.get("name", g["store"]), "swap": g["swap"], "env": g.get("env", {}),
            "label": label, "ts": datetime.datetime.utcnow().isoformat(timespec="seconds") + "Z",
            "host": host_state(), "exit": r.returncode, "settle": settled, "summary": summ}
     with open(os.path.join(out, "results.jsonl"), "a") as f:
@@ -144,14 +144,14 @@ def main():
             continue
         sh(f"{KVCTL} stop")
         sh(f"{KVCTL} wipe {g['store']}")
-        env = " ".join(f"{k}={v}" for k, v in g.get("env", {}).items())
+        env = " ".join(f"{k}='{v}'" for k, v in g.get("env", {}).items())
         sh(f"{env} {SWAPMODE} {g['swap']}")
         sh("sync; echo 3 > /proc/sys/vm/drop_caches")
         sh(f"{env} {KVCTL} start {g['store']}")
         pid = sh(f"{KVCTL} pid", capture=True).strip()
         t0 = time.time()
         r = subprocess.run(f"{KVB} load {data_args(g['data'])} --threads 4 --conns 4 --cpus {dflt['cpus']} --server-pid {pid} "
-                           f"--label 'load|{g['store']}|{g['swap']}' --quiet --out {out}/loads.jsonl",
+                           f"--label 'load|{g.get('name', g['store'])}|{g['swap']}' --quiet --out {out}/loads.jsonl",
                            shell=True, text=True, capture_output=True)
         try:
             ls = json.loads(r.stdout)

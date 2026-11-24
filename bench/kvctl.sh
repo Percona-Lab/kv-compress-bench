@@ -35,14 +35,15 @@ case $cmd in
         unit_run -p WorkingDirectory=/data/valkey $VALKEY --bind 127.0.0.1 --port 6379 --save "" --appendonly no \
           --protected-mode no --io-threads $IO --logfile /data/valkey/valkey.log ;;
       kvrocks)
+        # shipped kvrocks.conf (rocksdb.compression snappy from level 2, 4 GB block cache, 16 KB blocks) with only
+        # bind/port/dir/log-dir/workers changed, plus KVROCKS_OPTS="key=value key=value" overrides
         mkdir -p /data/kvrocks
-        cat > /data/kvrocks.conf <<C
-bind 127.0.0.1
-port 6379
-dir /data/kvrocks
-workers ${KVROCKS_WORKERS:-6}
-log-dir /data/kvrocks
-C
+        cp /opt/src/kvrocks-2.17.0/kvrocks.conf /data/kvrocks.conf
+        set_conf() { if grep -q "^$1 " /data/kvrocks.conf; then sed -i "s|^$1 .*|$1 $2|" /data/kvrocks.conf; else echo "$1 $2" >> /data/kvrocks.conf; fi; }
+        set_conf bind 127.0.0.1; set_conf port 6379; set_conf dir /data/kvrocks; set_conf log-dir /data/kvrocks
+        set_conf workers ${KVROCKS_WORKERS:-6}; set_conf daemonize no
+        for kv in ${KVROCKS_OPTS:-}; do set_conf "${kv%%=*}" "${kv#*=}"; done
+        grep -E "^(bind|port|dir|workers|rocksdb\.(compression|block_cache_size|compression_start_level))" /data/kvrocks.conf
         unit_run $KVROCKS -c /data/kvrocks.conf ;;
       lavik)
         mkdir -p /data/lavik/logs
