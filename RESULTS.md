@@ -9,6 +9,9 @@ Valkey 9.2.0 (single main thread, default `io-threads 1`) with more data than RA
 32 GB RAM (31 GB usable) and SATA SSDs, Ubuntu 26.04, kernel 7.0. Valkey keeps everything in memory; when it does not
 fit, the kernel swaps pages out: to compressed RAM (zram, or zswap in front of a swap file) or to the SSD (disk swap).
 
+> **Rerun in progress** on newer hardware (AMD EPYC 4245P, NVMe) with a revised protocol. This version is archived as
+> [reports/v1/RESULTS.md](reports/v1/RESULTS.md) and on the web at [/v1/](https://percona-lab.github.io/kv-compress-bench/v1/).
+
 ## Summary
 
 * **Compressing values in the client beats every kernel option.** With lz4 or zstd applied by the client before SET, 40 GB of data

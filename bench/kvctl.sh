@@ -1,6 +1,6 @@
 #!/bin/bash
 # Start / stop one store at a time on 127.0.0.1:6379 as the systemd unit kvbsrv.
-#   kvctl.sh start valkey|valkey-io|kvrocks|tideskv|lavik   kvctl.sh stop   kvctl.sh pid   kvctl.sh wipe <store>
+#   kvctl.sh start valkey|valkey-io|redis|redis-io|dragonfly|keydb|garnet|pika|kvrocks|tideskv|lavik   kvctl.sh stop   kvctl.sh pid   kvctl.sh wipe <store>
 # CPU layout (E-2286G, cpu N and N+6 are SMT siblings): OS 0,6 | server 1-3,7-9 | client 4,5,10,11
 # Every non-default setting is listed here (and copied into results by run scripts).
 set -euo pipefail
@@ -9,6 +9,12 @@ VALKEY=/opt/valkey-9.2.0/bin/valkey-server
 KVROCKS=/opt/kvrocks-2.17.0/bin/kvrocks
 LAVIK=/opt/lavik-0.3.2/lavik
 TIDESKV=/opt/tideskv/bin/tideskv-server
+REDIS=/opt/stores/redis-8.12.0/bin/redis-server
+DRAGONFLY=/opt/stores/dragonfly-2.1/dragonfly-x86_64
+KEYDB=/opt/stores/keydb-6.3.4/bin/keydb-server
+GARNET=/opt/stores/garnet-2.2.14/net10.0/GarnetServer
+PIKA=/opt/stores/pika-4.0.4/bin/pika
+NCPU=$(echo $SRV_CPUS | tr , '\n' | wc -l)
 LAVIK_GB=${LAVIK_GB:-300}
 cmd=${1:?}; store=${2:-}
 
@@ -46,6 +52,35 @@ case $cmd in
         for kv in ${KVROCKS_OPTS:-}; do set_conf "${kv%%=*}" "${kv#*=}"; done
         grep -E "^(bind|port|dir|workers|rocksdb\.(compression|block_cache_size|compression_start_level))" /data/kvrocks.conf
         unit_run $KVROCKS -c /data/kvrocks.conf ;;
+      redis|redis-io)
+        mkdir -p /data/redis
+        IO=1; [ $store = redis-io ] && IO=${REDIS_IO_THREADS:-4}
+        # non-defaults: no persistence, protected-mode off (loopback only), io-threads
+        unit_run -p WorkingDirectory=/data/redis $REDIS --bind 127.0.0.1 --port 6379 --save "" --appendonly no \
+          --protected-mode no --io-threads $IO --logfile /data/redis/redis.log ;;
+      dragonfly)
+        # non-defaults: one proactor thread per server CPU, no snapshots; DRAGONFLY_OPTS e.g. "--tiered_prefix=/data/dragonfly/tier"
+        mkdir -p /data/dragonfly
+        unit_run -p WorkingDirectory=/data/dragonfly $DRAGONFLY --bind 127.0.0.1 --port 6379 --proactor_threads $NCPU \
+          --dbfilename "" --dir /data/dragonfly --logtostderr ${DRAGONFLY_OPTS:-} ;;
+      keydb)
+        # non-defaults: no persistence, protected-mode off, server-threads
+        mkdir -p /data/keydb
+        unit_run -p WorkingDirectory=/data/keydb $KEYDB --bind 127.0.0.1 --port 6379 --save "" --appendonly no \
+          --protected-mode no --server-threads ${KEYDB_THREADS:-4} --logfile /data/keydb/keydb.log ;;
+      garnet)
+        # non-defaults: GARNET_OPTS, e.g. "-m 24g" (in RAM) or "--storage-tier --logdir /data/garnet" (tiered to SSD)
+        mkdir -p /data/garnet
+        unit_run -p WorkingDirectory=/data/garnet $GARNET --bind 127.0.0.1 --port 6379 ${GARNET_OPTS:-} ;;
+      pika)
+        # shipped pika.conf with port/paths changed and thread settings from PIKA_THREADS / PIKA_POOL
+        mkdir -p /data/pika
+        cp $(dirname $PIKA)/../conf/pika.conf /data/pika.conf
+        sed -i -e "s|^port :.*|port : 6379|" -e "s|^db-path :.*|db-path : /data/pika/db/|" -e "s|^log-path :.*|log-path : /data/pika/log/|" \
+          -e "s|^dump-path :.*|dump-path : /data/pika/dump/|" -e "s|^thread-num :.*|thread-num : ${PIKA_THREADS:-1}|" \
+          -e "s|^thread-pool-size :.*|thread-pool-size : ${PIKA_POOL:-12}|" /data/pika.conf
+        grep -E "^(port|thread-num|thread-pool-size|db-path|compression|db-instance-num)" /data/pika.conf
+        unit_run -p WorkingDirectory=/data/pika $PIKA -c /data/pika.conf ;;
       tideskv)
         # TidesKV defaults (compression lz4, 4 GB block cache, sync-mode interval = fsync once a second) with only
         # bind/port/dir/workers changed, plus TIDESKV_OPTS="key=value ..." overrides
@@ -69,6 +104,6 @@ case $cmd in
   pid) systemctl show -p MainPID --value kvbsrv ;;
   wipe)
     systemctl is-active -q kvbsrv && { echo "stop first" >&2; exit 1; }
-    case $store in valkey|valkey-io) rm -rf /data/valkey ;; kvrocks) rm -rf /data/kvrocks ;; tideskv) rm -rf /data/tideskv ;; lavik) rm -rf /data/lavik ;; esac ;;
+    case $store in valkey|valkey-io) rm -rf /data/valkey ;; kvrocks) rm -rf /data/kvrocks ;; tideskv) rm -rf /data/tideskv ;; redis|redis-io) rm -rf /data/redis ;; dragonfly) rm -rf /data/dragonfly ;; keydb) rm -rf /data/keydb ;; garnet) rm -rf /data/garnet ;; pika) rm -rf /data/pika /data/pika.conf ;; lavik) rm -rf /data/lavik ;; esac ;;
   *) echo "usage" >&2; exit 2 ;;
 esac

@@ -103,6 +103,10 @@ footer { margin-top: 48px; color: var(--ink-2); font-size: 0.85rem; }
   <a href="https://github.com/Percona-Lab/kv-compress-bench/issues">open an issue</a> if you find a problem.</div>
 </header>
 
+<div class="disclosure" style="background:var(--surface-2);color:var(--ink)"><strong>Rerun in progress.</strong> These results come from an older
+Intel Xeon E-2286G with SATA SSDs and the first benchmark protocol. A rerun on an AMD EPYC 4245P with NVMe, with a revised protocol (settling at the measured
+rate, longer latency windows, repeats in shuffled order, multi-threaded Valkey and Redis, more stores) is in progress; this version stays available at
+<a href="v1/">/v1/</a>.</div>
 <div class="tiles" id="tiles"></div>
 
 <h2>Key findings</h2>
