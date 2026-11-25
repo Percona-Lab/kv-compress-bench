@@ -118,6 +118,27 @@ impl ValueGen {
         len
     }
 
+    /// Version stored in a value's header (`<key>:<hexver>:`), if the header is intact and names `key`.
+    pub fn header_version(&self, key: u64, got: &[u8]) -> Option<u64> {
+        let mut kb = [0u8; 20];
+        let k = fmt_u64(key, &mut kb);
+        if got.len() < k.len() + 2 || &got[..k.len()] != k || got[k.len()] != b':' {
+            return None;
+        }
+        let rest = &got[k.len() + 1..];
+        let end = rest.iter().position(|&c| c == b':')?;
+        let mut ver = 0u64;
+        for &c in &rest[..end] {
+            let d = match c {
+                b'0'..=b'9' => c - b'0',
+                b'a'..=b'f' => c - b'a' + 10,
+                _ => return None,
+            };
+            ver = (ver << 4) | d as u64;
+        }
+        Some(ver)
+    }
+
     /// Check a value read back for `key`. The version is taken from the
     /// header, then the whole value is regenerated and compared.
     pub fn verify(&self, key: u64, got: &[u8]) -> bool {

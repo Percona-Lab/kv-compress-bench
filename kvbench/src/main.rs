@@ -14,7 +14,7 @@ use serde_json::{json, Map, Value};
 use std::collections::BTreeMap;
 use std::io::Write;
 use std::net::ToSocketAddrs;
-use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU32, AtomicU64, Ordering};
 use std::sync::{mpsc, Arc};
 use std::time::Duration;
 use values::ValueGen;
@@ -185,6 +185,11 @@ struct RunArgs {
     /// Check every GET value against the expected content.
     #[arg(long)]
     verify: bool,
+    /// Strict correctness check (implies --verify): each key is owned by one connection and every GET must return
+    /// the version of the last SET sent for that key (or, before the first SET in this run, the same version on
+    /// every read). Costs 4 bytes of client memory per key. All keys must have been loaded.
+    #[arg(long)]
+    check: bool,
 }
 
 fn parse_size(s: &str) -> Result<SizeDist, String> {
@@ -260,11 +265,14 @@ struct Agg {
     errors: u64,
     verify_fail: u64,
     backlog: u64,
+    check_ok: u64,
+    check_fail: u64,
+    check_learned: u64,
 }
 
 impl Agg {
     fn new() -> Self {
-        Agg { get_rt: new_hist(), set_rt: new_hist(), get_svc: new_hist(), set_svc: new_hist(), send_lag: new_hist(), misses: 0, errors: 0, verify_fail: 0, backlog: 0 }
+        Agg { get_rt: new_hist(), set_rt: new_hist(), get_svc: new_hist(), set_svc: new_hist(), send_lag: new_hist(), misses: 0, errors: 0, verify_fail: 0, backlog: 0, check_ok: 0, check_fail: 0, check_learned: 0 }
     }
     fn add(&mut self, s: &Snapshot) {
         self.get_rt.add(&s.get_rt).ok();
@@ -276,6 +284,9 @@ impl Agg {
         self.errors += s.errors;
         self.verify_fail += s.verify_fail;
         self.backlog += s.backlog;
+        self.check_ok += s.check_ok;
+        self.check_fail += s.check_fail;
+        self.check_learned += s.check_learned;
     }
     fn add_agg(&mut self, s: &Agg) {
         self.get_rt.add(&s.get_rt).ok();
@@ -287,6 +298,9 @@ impl Agg {
         self.errors += s.errors;
         self.verify_fail += s.verify_fail;
         self.backlog = s.backlog;
+        self.check_ok += s.check_ok;
+        self.check_fail += s.check_fail;
+        self.check_learned += s.check_learned;
     }
     fn all_rt(&self) -> Histogram<u64> {
         let mut h = self.get_rt.clone();
@@ -417,6 +431,8 @@ fn base_shared(d: &DataArgs, c: &ConnArgs, vals: Arc<ValueGen>, mode: Mode) -> S
         vals,
         verify: false,
         client_compress: codec::parse(&d.client_compress).unwrap_or_else(|e| die(&e)),
+        check: None,
+        threads: c.threads,
         stop: AtomicBool::new(false),
         start_ns: AtomicU64::new(0),
         interval_ns: (c.interval * 1e9) as u64,
@@ -514,7 +530,10 @@ fn cmd_run(a: RunArgs) {
     sh.get_ratio = a.get_ratio;
     sh.dist = dist.clone();
     sh.scramble = if scramble_on { Some(Scramble::new(a.data.keys)) } else { None };
-    sh.verify = a.verify;
+    sh.verify = a.verify || a.check;
+    if a.check {
+        sh.check = Some((0..a.data.keys).map(|_| AtomicU32::new(0)).collect());
+    }
     sh.spin_ns = (a.spin_us * 1000.0) as u64;
     let stream_seed = if a.stream_seed != 0 { a.stream_seed } else {
         dist::mix64(now_ns() ^ ((std::process::id() as u64) << 32)) | 1
@@ -679,6 +698,8 @@ fn cmd_run(a: RunArgs) {
             "note": "latency = from scheduled send time (open loop) / actual send (closed loop); service = from actual send",
         },
         "misses": total.misses, "errors": total.errors, "verify_fail": total.verify_fail,
+        "check": if a.check { json!({"gets_checked": total.check_ok + total.check_fail, "ok": total.check_ok, "fail": total.check_fail,
+            "learned_first_read": total.check_learned, "warmup_ok": warm.check_ok, "warmup_fail": warm.check_fail}) } else { Value::Null },
         "final_backlog": total.backlog,
         "client_compress": if vraw > 0 { json!({"value_bytes": vraw, "sent_bytes": vcomp, "ratio": vraw as f64 / vcomp.max(1) as f64}) } else { Value::Null },
         "cpu": cpu, "system": sys,
@@ -699,7 +720,11 @@ fn cmd_run(a: RunArgs) {
     if cpu.get("client_saturated").and_then(|v| v.as_bool()) == Some(true) {
         eprintln!("WARNING: client threads were >90% busy: throughput may be limited by the client, add --threads/--cpus");
     }
-    if failed.is_some() || total.errors > 0 || total.verify_fail > 0 {
+    if a.check {
+        eprintln!("CHECK: {} GETs checked against the last SET, {} mismatches; {} first reads learned (warm-up: {} ok, {} mismatches)",
+            total.check_ok + total.check_fail, total.check_fail, total.check_learned, warm.check_ok, warm.check_fail);
+    }
+    if failed.is_some() || total.errors > 0 || total.verify_fail > 0 || total.check_fail > 0 || warm.check_fail > 0 {
         std::process::exit(1);
     }
 }

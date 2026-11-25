@@ -19,7 +19,7 @@ use mio::{Events, Interest, Poll, Token};
 use std::collections::VecDeque;
 use std::io::{self, Write};
 use std::os::fd::AsRawFd;
-use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU32, AtomicU64, Ordering};
 use std::sync::mpsc::Sender;
 use std::sync::Arc;
 
@@ -60,6 +60,10 @@ pub struct Shared {
     pub verify: bool,
     /// compress values in the client before SET, decompress after GET
     pub client_compress: Option<Kind>,
+    /// --check: per key, a 32-bit tag of the version the last SET sent (0 = not known yet). Each key is
+    /// owned by one connection, so a GET must return exactly the last SET sent before it on that connection.
+    pub check: Option<Vec<AtomicU32>>,
+    pub threads: usize,
     pub stop: AtomicBool,
     pub start_ns: AtomicU64,
     pub interval_ns: u64,
@@ -87,6 +91,10 @@ pub struct Snapshot {
     /// client compression: value bytes before / after compression (SETs), sent with the final snapshot
     pub value_raw_bytes: u64,
     pub value_comp_bytes: u64,
+    /// --check counters: GETs compared with the expected version, mismatches, versions learned (first read)
+    pub check_ok: u64,
+    pub check_fail: u64,
+    pub check_learned: u64,
 }
 
 impl Snapshot {
@@ -106,6 +114,9 @@ impl Snapshot {
             final_: false,
             value_raw_bytes: 0,
             value_comp_bytes: 0,
+            check_ok: 0,
+            check_fail: 0,
+            check_learned: 0,
         }
     }
 }
@@ -118,6 +129,14 @@ struct Pending {
     key: u64,
     intended: u64,
     sent: u64,
+    /// --check: expected version tag when the GET was sent (0 = unknown)
+    exp: u32,
+}
+
+/// 32-bit tag of a value version (never 0, which means "unknown")
+#[inline]
+pub fn ver_tag(ver: u64) -> u32 {
+    (crate::dist::mix64(ver) as u32) | 1
 }
 
 struct Conn {
@@ -238,18 +257,31 @@ impl<'a> Worker<'a> {
     /// Queue one request on connection `ci`. Returns false if no key is left (load).
     #[inline]
     fn issue(&mut self, ci: usize, intended: u64, now: u64) -> bool {
-        let key = match self.next_key() {
+        let mut key = match self.next_key() {
             Some(k) => k,
             None => return false,
         };
+        if self.sh.check.is_some() && matches!(self.sh.mode, Mode::Run) {
+            // move the key to the residue class owned by (this thread, this connection), keeping its neighbourhood
+            let unit = (self.sh.threads * self.sh.conns) as u64;
+            let slot = (ci * self.sh.threads + self.tid) as u64;
+            key = (key / unit) * unit + slot;
+            if key >= self.sh.keys {
+                key -= unit;
+            }
+        }
         let op = match self.sh.mode {
             Mode::Load => OP_SET,
             Mode::Run => {
                 if self.rng.f64() < self.sh.get_ratio { OP_GET } else { OP_SET }
             }
         };
+        let mut exp = 0u32;
         let c = &mut self.conns[ci];
         if op == OP_GET {
+            if let Some(chk) = &self.sh.check {
+                exp = chk[key as usize].load(Ordering::Relaxed);
+            }
             resp::encode_get(&mut c.wbuf, &self.sh.prefix, key);
         } else {
             let ver = match self.sh.mode {
@@ -259,6 +291,9 @@ impl<'a> Worker<'a> {
                     ((self.tid as u64 + 1) << 40) | (self.sh.seed & 0xFF) << 32 /* differs between runs: SET versions stay unique */ | (self.ver_counter & 0xFFFF_FFFF)
                 }
             };
+            if let Some(chk) = &self.sh.check {
+                chk[key as usize].store(ver_tag(ver), Ordering::Relaxed);
+            }
             if let Some(cd) = self.codec.as_mut() {
                 cd.raw.clear();
                 self.sh.vals.write(key, ver, &mut cd.raw);
@@ -271,7 +306,7 @@ impl<'a> Worker<'a> {
         if self.sh.rate_per_thread.is_some() {
             self.snap.send_lag.saturating_record(now.saturating_sub(intended).max(1));
         }
-        c.inflight.push_back(Pending { op, key, intended, sent: now });
+        c.inflight.push_back(Pending { op, key, intended, sent: now, exp });
         c.dirty = true;
         true
     }
@@ -294,15 +329,50 @@ impl<'a> Worker<'a> {
             let svc = now.saturating_sub(p.sent).max(1);
             match (p.op, reply) {
                 (OP_GET, Reply::Bulk(s, l)) => {
+                    let mut ok_bytes = true;
                     if let Some(cd) = self.codec.as_mut() {
                         // decompress every value (that is the client's cost), check it if asked
                         if !cd.decompress(&c.rbuf[s..s + l]) {
                             self.snap.verify_fail += 1;
+                            ok_bytes = false;
                         } else if self.sh.verify && !self.sh.vals.verify(p.key, &cd.raw) {
                             self.snap.verify_fail += 1;
+                            ok_bytes = false;
                         }
                     } else if self.sh.verify && !self.sh.vals.verify(p.key, &c.rbuf[s..s + l]) {
                         self.snap.verify_fail += 1;
+                        ok_bytes = false;
+                    }
+                    if let Some(chk) = &self.sh.check {
+                        let body: &[u8] = match self.codec.as_ref() { Some(cd) => &cd.raw, None => &c.rbuf[s..s + l] };
+                        match (ok_bytes, self.sh.vals.header_version(p.key, body)) {
+                            (true, Some(v)) => {
+                                let t = ver_tag(v);
+                                if p.exp == 0 {
+                                    // first read of this key in this run: learn it, unless a SET was sent since
+                                    let _ = chk[p.key as usize].compare_exchange(0, t, Ordering::Relaxed, Ordering::Relaxed);
+                                    self.snap.check_learned += 1;
+                                } else if t == p.exp {
+                                    self.snap.check_ok += 1;
+                                } else {
+                                    self.snap.check_fail += 1;
+                                    if self.errors_printed < 10 {
+                                        self.errors_printed += 1;
+                                        eprintln!("CHECK FAIL key {}: got version {:x}, expected tag {:x}", p.key, v, p.exp);
+                                    }
+                                }
+                            }
+                            _ => self.snap.check_fail += 1,
+                        }
+                    }
+                }
+                (OP_GET, Reply::Nil) if self.sh.check.is_some() => {
+                    // every key was loaded: a miss is a lost key
+                    self.snap.misses += 1;
+                    self.snap.check_fail += 1;
+                    if self.errors_printed < 10 {
+                        self.errors_printed += 1;
+                        eprintln!("CHECK FAIL key {}: GET returned nil", p.key);
                     }
                 }
                 (OP_GET, Reply::Nil) => self.snap.misses += 1,
