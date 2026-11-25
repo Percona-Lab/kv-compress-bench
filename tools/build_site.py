@@ -16,6 +16,7 @@ STUDIES = [
     ("valkey-swap-64g-zswap-noshrink", "64g", "noshrink"),
     ("valkey-swap-varlen-35m", "var40g", None),
     ("valkey-swap-varlen-r1", "var30m", None),
+    ("valkey-client-compress", "auto", "client"),
 ]
 # later entries replace earlier ones for the same (data set, mode, workload): the 40 GB reruns replace the stores-r1
 # groups that overlapped side work on the benchmark host
@@ -56,6 +57,10 @@ def rows():
             mode = r["swap"] + ("-" + tag if tag else "")
             store = r.get("store", "valkey")
             dset = ds
+            if tag == "client":  # client-side compression study: mode from the group name, data set from the key count
+                mode = store.replace("valkey-", "")          # client-lz4, client-zstd:-1, client-zstd:3
+                store = "valkey"
+                dset = "40g" if int(label[2]) == 30000000 else "64g"
             if dset is None:  # stores study: data set from key count
                 dset = "40g" if int(label[2]) == 30000000 else "64g"
                 mode = store
@@ -82,6 +87,8 @@ def rows():
                 "ratio": round(ratio, 2) if ratio else None,
                 "zswap_wb_s": round(sy.get("zswap_writeback_s", 0)),
                 "disk_read_mb_s": round(sy.get("disk_read_mb_s", 0), 1),
+                "cli_us": round(s["cpu"].get("client_cpu_us_per_op", 0), 2),
+                "cc_ratio": round(s["client_compress"]["ratio"], 2) if s.get("client_compress") else None,
             }
     return list(out.values())
 

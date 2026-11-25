@@ -11,6 +11,10 @@ fit, the kernel swaps pages out: to compressed RAM (zram, or zswap in front of a
 
 ## Summary
 
+* **Compressing values in the client beats every kernel option.** With lz4 or zstd applied by the client before SET, 40 GB of data
+  takes 9.5-11.8 GB in Valkey and 64 GB takes 14.5-18.2 GB, so it all fits in RAM and Valkey runs as fast as with uncompressed data in RAM,
+  at 1-5 µs more client CPU per operation. See [client-side compression](#client-side-compression-instead-of-kernel-compression).
+  The rest of this summary is about what to do when the client cannot be changed.
 * **zram with lz4 is the best choice in every test.** With 40 GB of data on 31 GB of RAM (~30% of Valkey's memory
   compressed) it costs 27% of throughput with uniform key access, 5-8% with skewed access and ~0% with a tight
   hot set; at a fixed 50k ops/s p99 latency rises from 57 µs to 70-99 µs. At 64 GB (2x RAM) it still delivers
@@ -176,6 +180,32 @@ Disk swap at a fixed rate: latency capped at the 60 s histogram limit when the t
 * Disk swap, 40 GB, normal access: throughput was still creeping up (settle 119k, measured 133k); treat as a lower bound.
 * zswap zstd 3 at 64 GB with the shrinker off, uniform @ 50k ops/s (p99 537 µs vs 165 µs for zram zstd 3) and the
   variable-length 35M-key zswap zstd uniform @ 50k ops/s point (207 µs) are single outliers not yet explained.
+
+## Client-side compression instead of kernel compression
+
+The application compresses each value before SET and decompresses it after GET (`kvbench --client-compress`); Valkey stores the
+compressed bytes. Disk swap was enabled only as overflow and was never used. Same data sets and workloads as above.
+
+| Data | Mode | Valkey memory | Uniform (ops/s) | Zipfian (ops/s) | Uniform @ 50k p99 / p99.9 | Client CPU µs/op | Server CPU µs/op |
+|---|---|---|---|---|---|---|---|
+| - | in RAM, uncompressed (15M keys) | 20.1 GB | 147.2k | 150.2k | 57 / 83 µs | 11.1 | 6.8 |
+| 40 GB | zram lz4 | 39.9 GB (11.7 GB swapped) | 107.2k | 138.5k | 99 / 205 µs | 11.5 | 9.3 |
+| 40 GB | client lz4 | 11.8 GB | 150.6k | 153.3k | 57 / 66 µs | 12.1 | 6.6 |
+| 40 GB | client zstd -1 | 11.1 GB | 153.4k | 156.1k | 58 / 65 µs | 14.5 | 6.5 |
+| 40 GB | client zstd 3 | 9.5 GB | 155.6k | 157.5k | 59 / 65 µs | 16.0 | 6.4 |
+| 64 GB | zram lz4 | 63.6 GB (41.8 GB swapped) | 83.7k | 126.0k | 103 / 242 µs | 11.7 | 12.0 |
+| 64 GB | client lz4 | 18.2 GB | 150.1k | 153.0k | 58 / 70 µs | 12.1 | 6.7 |
+| 64 GB | client zstd -1 | 17.0 GB | 153.6k | 156.1k | 59 / 80 µs | 14.4 | 6.5 |
+| 64 GB | client zstd 3 | 14.5 GB | 155.8k | 157.9k | 59 / 78 µs | 15.9 | 6.4 |
+
+* All data fits in RAM once compressed, so throughput and latency match (and slightly beat, by 2-6%) the uncompressed in-RAM run:
+  Valkey moves ~300 bytes per value instead of 1 KiB. The cost moves to the client: +1.0 µs per operation with lz4, +3.4 µs with
+  zstd -1, +4.9 µs with zstd 3.
+* Compressing values one at a time gives a lower ratio than the kernel gets on 4 KiB pages: 3.2x with lz4 (zram on Valkey's pages
+  4.6x), 3.9x with zstd -1 (7.5x), 4.2x with zstd 3 (8.1x). It still wins because all data is compressed and stays in RAM, instead
+  of only the overflow being compressed and paged back in on access.
+* Not measured here: values become opaque to the server (no APPEND, GETRANGE, INCR on them), every client must use the same codec,
+  and small or already-compressed values gain little.
 
 ## Kvrocks, Lavik and TidesKV
 

@@ -1,0 +1,228 @@
+{
+ "name": "valkey-client-compress",
+ "defaults": {
+  "threads": 4,
+  "conns": 16,
+  "cpus": "4,5,10,11",
+  "warmup": 60,
+  "time": 120
+ },
+ "groups": [
+  {
+   "name": "valkey-client-lz4",
+   "store": "valkey",
+   "swap": "disk",
+   "env": {
+    "SWAP_GB": 96
+   },
+   "data": {
+    "keys": 30000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10,
+    "client_compress": "lz4"
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "zipfian:0.99"
+    },
+    {
+     "key_dist": "hotspot:0.1:0.9"
+    },
+    {
+     "key_dist": "normal:0.5:0.05"
+    },
+    {
+     "key_dist": "uniform",
+     "rate": 50000
+    },
+    {
+     "key_dist": "zipfian:0.99",
+     "rate": 50000
+    }
+   ]
+  },
+  {
+   "name": "valkey-client-zstd:-1",
+   "store": "valkey",
+   "swap": "disk",
+   "env": {
+    "SWAP_GB": 96
+   },
+   "data": {
+    "keys": 30000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10,
+    "client_compress": "zstd:-1"
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "zipfian:0.99"
+    },
+    {
+     "key_dist": "hotspot:0.1:0.9"
+    },
+    {
+     "key_dist": "normal:0.5:0.05"
+    },
+    {
+     "key_dist": "uniform",
+     "rate": 50000
+    },
+    {
+     "key_dist": "zipfian:0.99",
+     "rate": 50000
+    }
+   ]
+  },
+  {
+   "name": "valkey-client-zstd:3",
+   "store": "valkey",
+   "swap": "disk",
+   "env": {
+    "SWAP_GB": 96
+   },
+   "data": {
+    "keys": 30000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10,
+    "client_compress": "zstd:3"
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "zipfian:0.99"
+    },
+    {
+     "key_dist": "hotspot:0.1:0.9"
+    },
+    {
+     "key_dist": "normal:0.5:0.05"
+    },
+    {
+     "key_dist": "uniform",
+     "rate": 50000
+    },
+    {
+     "key_dist": "zipfian:0.99",
+     "rate": 50000
+    }
+   ]
+  },
+  {
+   "name": "valkey-client-lz4",
+   "store": "valkey",
+   "swap": "disk",
+   "env": {
+    "SWAP_GB": 96
+   },
+   "data": {
+    "keys": 48000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10,
+    "client_compress": "lz4"
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "zipfian:0.99"
+    },
+    {
+     "key_dist": "hotspot:0.1:0.9"
+    },
+    {
+     "key_dist": "normal:0.5:0.05"
+    },
+    {
+     "key_dist": "uniform",
+     "rate": 50000
+    },
+    {
+     "key_dist": "zipfian:0.99",
+     "rate": 50000
+    }
+   ]
+  },
+  {
+   "name": "valkey-client-zstd:-1",
+   "store": "valkey",
+   "swap": "disk",
+   "env": {
+    "SWAP_GB": 96
+   },
+   "data": {
+    "keys": 48000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10,
+    "client_compress": "zstd:-1"
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "zipfian:0.99"
+    },
+    {
+     "key_dist": "hotspot:0.1:0.9"
+    },
+    {
+     "key_dist": "normal:0.5:0.05"
+    },
+    {
+     "key_dist": "uniform",
+     "rate": 50000
+    },
+    {
+     "key_dist": "zipfian:0.99",
+     "rate": 50000
+    }
+   ]
+  },
+  {
+   "name": "valkey-client-zstd:3",
+   "store": "valkey",
+   "swap": "disk",
+   "env": {
+    "SWAP_GB": 96
+   },
+   "data": {
+    "keys": 48000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10,
+    "client_compress": "zstd:3"
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "zipfian:0.99"
+    },
+    {
+     "key_dist": "hotspot:0.1:0.9"
+    },
+    {
+     "key_dist": "normal:0.5:0.05"
+    },
+    {
+     "key_dist": "uniform",
+     "rate": 50000
+    },
+    {
+     "key_dist": "zipfian:0.99",
+     "rate": 50000
+    }
+   ]
+  }
+ ]
+}

@@ -107,7 +107,10 @@ footer { margin-top: 48px; color: var(--ink-2); font-size: 0.85rem; }
 
 <h2>Key findings</h2>
 <ul>
-  <li><strong>zram with lz4 is the best option tested.</strong> With 40 GB of data on 31 GB of RAM (about 30% of Valkey's memory compressed),
+  <li><strong>Compressing values in the client beats every kernel option.</strong> With values compressed by the client (lz4 or zstd) before SET, 40 GB of data takes
+  9.5-11.8 GB in Valkey and 64 GB takes 14.5-18.2 GB, so everything fits in RAM: throughput and latency are the same as (slightly better than) the
+  uncompressed in-RAM run, at 1-5 µs more client CPU per operation. <a href="#client">Details below.</a></li>
+  <li><strong>Without changing the client, zram with lz4 is the best option tested.</strong> With 40 GB of data on 31 GB of RAM (about 30% of Valkey's memory compressed),
   it costs 27% of throughput when every key is equally likely, 5-8% with skewed access and about nothing with a tight hot set.
   At 64 GB (2x RAM) Valkey still delivers 57-96% of its in-RAM throughput.</li>
   <li><strong>zstd loses to lz4 at every level tried (3, 1, -1).</strong> It compresses Valkey's pages 7.5-8.4x instead of 4.6x and keeps
@@ -137,6 +140,7 @@ footer { margin-top: 48px; color: var(--ink-2); font-size: 0.85rem; }
       <option value="p999">p99.9 latency at 50k ops/s</option>
       <option value="faults">Page faults per operation</option>
       <option value="srv_us">Server CPU per operation</option>
+      <option value="cli_us">Client CPU per operation</option>
       <option value="stall_s">Seconds with stalls (a request waited &gt;100 ms)</option>
     </select></label>
     <label>Key access<select id="wl"></select></label>
@@ -170,6 +174,20 @@ those pages become disk reads in Valkey's single thread.</p>
   <div class="scroll" id="shrinkchart-table" hidden></div>
 </div>
 </div>
+
+<h2 id="client">Client-side compression instead of kernel compression</h2>
+<p>The application compresses each value before SET and decompresses it after GET (kvbench <code>--client-compress</code>); Valkey stores
+the compressed bytes. Disk swap was enabled only as overflow and was never used: the compressed data fits in RAM.</p>
+<div class="card scroll" id="cctable"></div>
+<ul>
+  <li>Each value is compressed on its own, which loses ratio compared with the kernel compressing whole 4 KiB pages: 3.2x per value with lz4 (zram: 4.6x
+  on Valkey's pages) and 4.2x with zstd 3 (zram: 8.1x). It still wins by far, because <em>all</em> data is compressed and stays in RAM, instead of the overflow
+  being compressed and paged back on access.</li>
+  <li>Throughput is 2-6% above the uncompressed in-RAM run: Valkey moves ~300 bytes per value instead of 1 KiB. The client pays for it:
+  +1.0 µs per operation with lz4, +3.4 µs with zstd -1, +4.9 µs with zstd 3.</li>
+  <li>Trade-offs not measured here: values become opaque to the server (no APPEND, GETRANGE, INCR on them), every client must use the same codec, and
+  small or already-compressed values gain little.</li>
+</ul>
 
 <h2>Where the memory is</h2>
 <p>Valkey's memory at the end of the uniform full-load run: how much stays resident (uncompressed) and how much is swapped out,
@@ -250,10 +268,12 @@ const MODES = [
   ["none", "In RAM (20 GB, no swap)", "ram"], ["zram-lz4", "zram · lz4", "zram"], ["zram-zstd", "zram · zstd 3", "zram"],
   ["zram-zstd1", "zram · zstd 1", "zram"], ["zram-zstd-1", "zram · zstd -1", "zram"], ["zswap-lz4", "zswap · lz4", "zswap"],
   ["zswap-lz4-noshrink", "zswap · lz4 · shrinker off", "zswap"], ["zswap-zstd", "zswap · zstd 3", "zswap"],
-  ["zswap-zstd-noshrink", "zswap · zstd 3 · shrinker off", "zswap"], ["disk", "disk swap", "disk"]
+  ["zswap-zstd-noshrink", "zswap · zstd 3 · shrinker off", "zswap"], ["disk", "disk swap", "disk"],
+  ["client-lz4", "client compression · lz4", "client"], ["client-zstd:-1", "client compression · zstd -1", "client"],
+  ["client-zstd:3", "client compression · zstd 3", "client"]
 ];
 const FAM = { ram: ["In RAM", "--ram"], zram: ["zram", "--zram"], zswap: ["zswap", "--zswap"], disk: ["disk swap", "--disk"],
-  valkey: ["Valkey + zram lz4", "--zram"], kvrocks: ["Kvrocks", "--zswap"], lavik: ["Lavik", "--disk"], tideskv: ["TidesKV", "--c4"] };
+  client: ["client-side compression", "--c4"], valkey: ["Valkey + zram lz4", "--zram"], kvrocks: ["Kvrocks", "--zswap"], lavik: ["Lavik", "--disk"], tideskv: ["TidesKV", "--c4"] };
 const STORE_MODES = [
   ["valkey:zram-lz4", "Valkey 9.2 · zram lz4", "valkey"], ["kvrocks", "Kvrocks 2.17 · shipped (snappy)", "kvrocks"],
   ["kvrocks-lz4", "Kvrocks 2.17 · lz4", "kvrocks"], ["kvrocks-zstd", "Kvrocks 2.17 · zstd", "kvrocks"],
@@ -298,6 +318,7 @@ function showTip(ev, r, label) {
   }
   if (r.store === "valkey" && r.mode !== "none") lines.push(["page faults per op", r.faults.toFixed(3)]);
   if (r.srv_us) lines.push(["server CPU per op", r.srv_us.toFixed(1) + " µs"]);
+  if (r.cc_ratio) lines.push(["client compression", `${r.cc_ratio.toFixed(2)}x per value, client CPU ${r.cli_us.toFixed(1)} µs/op`]);
   if (r.stall_s) lines.push(["stall seconds", `${r.stall_s} of ${r.intervals} s had a request waiting >100 ms`]);
   if (r.store !== "valkey" && r.disk_read_mb_s) lines.push(["SSD reads", r.disk_read_mb_s + " MB/s"]);
   if (r.used_gb) lines.push(["Valkey memory", `${r.used_gb} GB (${r.rss_gb} resident, ${r.swap_gb} swapped)`]);
@@ -337,7 +358,7 @@ function bars(container, rows, opts) {
       track.append(b);
       if (row.value > nice) { const c = el("div", { class: "clip" }); c.style.left = "45%"; track.append(c); }
       const v = el("div", { class: "val" }, row.text);
-      if (w > 72) { v.style.right = `calc(${100 - w}% + 8px)`; v.style.color = row.fam === "tideskv" ? "#0b0b0b" : "#fff"; v.style.fontWeight = "600"; }
+      if (w > 72) { v.style.right = `calc(${100 - w}% + 8px)`; v.style.color = (row.fam === "tideskv" || row.fam === "client") ? "#0b0b0b" : "#fff"; v.style.fontWeight = "600"; }
       else v.style.left = `calc(${w}% + 6px)`;
       track.append(v);
     } else {
@@ -376,7 +397,7 @@ function wlOptions() {
   const m = $("metric").value, cur = $("wl").value;
   const closed = ["uniform|closed", "zipfian:0.99|closed", "hotspot:0.1:0.9|closed", "normal:0.5:0.05|closed"];
   const rate = ["uniform|rate50000", "zipfian:0.99|rate50000"];
-  const keys = (m === "p99" || m === "p999") ? rate : (m === "stall_s" || m === "srv_us") ? closed.concat(rate) : closed;
+  const keys = (m === "p99" || m === "p999") ? rate : (m === "stall_s" || m === "srv_us" || m === "cli_us") ? closed.concat(rate) : closed;
   $("wl").replaceChildren(...keys.map(k => el("option", { value: k }, WL[k] + (k.includes("rate") && !(m === "p99" || m === "p999") ? " @ 50k ops/s" : ""))));
   const same = keys.includes(cur) ? cur : keys.find(k => k.split("|")[0] === (cur || "").split("|")[0]);
   $("wl").value = same || keys[0];
@@ -394,6 +415,7 @@ function render() {
     if (m === "ops") { value = r.ops; text = fmtK(r.ops) + " ops/s"; }
     else if (m === "faults") { value = r.faults; text = r.faults.toFixed(3); }
     else if (m === "srv_us") { value = r.srv_us; text = r.srv_us.toFixed(1) + " µs"; }
+    else if (m === "cli_us") { value = r.cli_us; text = r.cli_us.toFixed(1) + " µs"; }
     else if (m === "stall_s") { value = r.stall_s; text = `${r.stall_s} s`; }
     else if (!r.met) { value = null; text = `target missed: reached only ${fmtK(r.ops)} ops/s`; }
     else { value = r[m]; text = fmtUs(r[m]); }
@@ -402,15 +424,15 @@ function render() {
   const dsName = $("ds").selectedOptions[0].text;
   const mName = { ops: "Throughput at full load (ops/s, higher is better)", p99: "p99 latency at a fixed 50k ops/s (lower is better)",
     p999: "p99.9 latency at a fixed 50k ops/s (lower is better)", faults: "Page faults per operation (pages read back from swap; lower is better)",
-    srv_us: "Server CPU time per operation, all threads (lower is better)", stall_s: "Seconds of the 120 s measured window in which a request waited more than 100 ms (lower is better)" }[m];
+    srv_us: "Server CPU time per operation, all threads (lower is better)", cli_us: "Client (kvbench) CPU time per operation, incl. compression (lower is better)", stall_s: "Seconds of the 120 s measured window in which a request waited more than 100 ms (lower is better)" }[m];
   $("ctitle").textContent = `${mName}`;
   $("csub").textContent = `${dsName} · ${WL[wl]} key access · 31 GB RAM`;
   bars("chart", rows, { clip: m === "p99" || m === "p999", unit: mName,
-    fmt: m === "ops" ? tickK : m === "faults" ? (v => v.toFixed(2)) : m === "srv_us" ? (v => v.toFixed(0) + " µs") : m === "stall_s" ? (v => v.toFixed(0) + " s") : (v => fmtUs(v)) });
+    fmt: m === "ops" ? tickK : m === "faults" ? (v => v.toFixed(2)) : (m === "srv_us" || m === "cli_us") ? (v => v.toFixed(0) + " µs") : m === "stall_s" ? (v => v.toFixed(0) + " s") : (v => fmtUs(v)) });
 }
 function legend(stores) {
   const lg = $("legend"); lg.replaceChildren();
-  for (const k of (stores ? ["valkey", "kvrocks", "lavik", "tideskv"] : ["ram", "zram", "zswap", "disk"])) { const s = el("span", {}, FAM[k][0]); s.style.setProperty("--c", `var(${FAM[k][1]})`); lg.append(s); }
+  for (const k of (stores ? ["valkey", "kvrocks", "lavik", "tideskv"] : ["ram", "zram", "zswap", "disk", "client"])) { const s = el("span", {}, FAM[k][0]); s.style.setProperty("--c", `var(${FAM[k][1]})`); lg.append(s); }
 }
 function tiles() {
   const base = find("40g", "none", "uniform|closed").ops;
@@ -454,6 +476,20 @@ function vartable() {
     }
   $("vartable").append(t);
 }
+function cctable() {
+  const t = el("table", { class: "t2" }); const h = el("tr");
+  for (const c of ["Data", "Mode", "Valkey memory (GB)", "Uniform (ops/s)", "Zipfian (ops/s)", "Uniform @ 50k: p99 / p99.9", "Client CPU µs/op", "Server CPU µs/op"]) h.append(el("th", {}, c));
+  t.append(h);
+  for (const [ds, dsl] of [["40g", "40 GB"], ["64g", "64 GB"]]) for (const [mode, label] of [["none", "in RAM, uncompressed (20 GB)"], ["zram-lz4", "zram lz4"], ["disk", "disk swap"], ["client-lz4", "client lz4"], ["client-zstd:-1", "client zstd -1"], ["client-zstd:3", "client zstd 3"]]) {
+    const u = find(ds, mode, "uniform|closed"), z = find(ds, mode, "zipfian:0.99|closed"), r = find(ds, mode, "uniform|rate50000");
+    if (!u) continue;
+    const tr = el("tr");
+    for (const v of [dsl, label, mode === "none" ? "20.1" : (u.used_gb != null ? u.used_gb.toFixed(1) : ""), fmtK(u.ops), z ? fmtK(z.ops) : "",
+      r ? (r.met ? `${fmtUs(r.p99)} / ${fmtUs(r.p999)}` : "missed") : "", u.cli_us ? u.cli_us.toFixed(1) : "", u.srv_us ? u.srv_us.toFixed(1) : ""]) tr.append(el("td", {}, String(v)));
+    t.append(tr);
+  }
+  $("cctable").append(t);
+}
 function stores() {
   if (!DATA.some(d => d.store !== "valkey")) return;
   const box = $("stores"); box.replaceChildren();
@@ -470,7 +506,7 @@ $("themeBtn").addEventListener("click", () => {
   document.documentElement.dataset.theme = dark ? "light" : "dark";
 });
 for (const id of ["ds", "metric", "wl"]) $(id).addEventListener("change", () => { if (id === "metric") wlOptions(); render(); });
-tiles(); wlOptions(); render(); shrink(); memtable(); vartable(); stores();
+tiles(); cctable(); wlOptions(); render(); shrink(); memtable(); vartable(); stores();
 </script>
 </body>
 </html>

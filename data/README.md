@@ -17,3 +17,5 @@ history, kvbench summary), `intervals.jsonl` (per-second lines), `loads.jsonl`, 
 
 Note on `stores-r1` (2026-11-24): the 40 GB `kvrocks-lz4`, `kvrocks-zstd` and `lavik` groups overlapped builds,
 smoke tests and screenshots run on the benchmark host; they are superseded by `stores-r1-rerun40`.
+| `valkey-client-compress` | client-side compression (lz4, zstd -1, zstd 3), 40 GB and 64 GB, disk swap as overflow only (never used) | yes |
+| `aborted-client-compress-zram` | first attempt with zram underneath (stopped) | no |

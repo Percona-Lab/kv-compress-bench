@@ -101,8 +101,10 @@ memory modes are set by `host/swapmode.sh`. Note that Lavik is designed for NVMe
 **Web page: https://percona-lab.github.io/kv-compress-bench/** (interactive charts, generated from `data/` by `tools/build_site.py`).
 
 **[RESULTS.md](RESULTS.md)**: Valkey 9.2 with 40 GB and 64 GB of data on 32 GB of RAM, using zram, zswap and disk
-swap, lz4 and zstd (levels 3, 1, -1), fixed and variable value sizes. In short:
+swap, lz4 and zstd (levels 3, 1, -1), fixed and variable value sizes, client-side compression, and Kvrocks, Lavik and TidesKV. In short:
 
+* Compressing values in the client (lz4/zstd) keeps 64 GB of data in 14.5-18.2 GB of RAM and Valkey at full in-RAM speed; the best option by far
+  when the client can be changed.
 * zram with lz4 is the best option tested: at 40 GB (30% of memory compressed) it costs 27% of throughput with
   uniform access and 0-8% with skewed access; at 64 GB (2x RAM) Valkey still does 57-96% of its in-RAM throughput,
   versus 3-86% with disk swap.
