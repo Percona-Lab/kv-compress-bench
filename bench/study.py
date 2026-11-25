@@ -63,40 +63,63 @@ def data_args(d):
 
 
 def settle(out, gi, pi, g, o):
-    """Drive the point's key distribution at full load in chunks until throughput is steady:
-    the last two chunks within settle_pct of each other, after at least 2 chunks, at most settle_max seconds.
-    Each distribution has its own hot set; after switching, the kernel needs time to bring it back into RAM."""
+    """Protocol v2: drive the point's own workload (same key distribution, same target rate if it has one) in chunks
+    until it is steady: two consecutive chunks with throughput within settle_pct and disk writes within
+    max(settle_disk_pct, settle_disk_mb) of each other (background flushes / compactions have settled at the level
+    this workload produces). At least 2 chunks, at most settle_max seconds."""
     chunk, pct, mx = o.get("settle_chunk", 30), o.get("settle_pct", 2.0), o.get("settle_max", 600)
+    dpct, dmb = o.get("settle_disk_pct", 25.0), o.get("settle_disk_mb", 5.0)
     if mx <= 0:
         return None
     pid = sh(f"{KVCTL} pid", capture=True).strip()
     hist = []
     t0 = time.time()
+
+    def steady():
+        if len(hist) < 2:
+            return False
+        (a, da), (b, db) = hist[-2], hist[-1]
+        ok_ops = abs(a - b) <= pct / 100 * max(a, b)
+        ok_disk = abs(da - db) <= max(dpct / 100 * max(da, db), dmb)
+        return ok_ops and ok_disk
+
     while time.time() - t0 < mx:
-        r = subprocess.run(f"{KVB} run {data_args(g['data'])} --threads {o['threads']} --conns {o['conns']} --cpus {o['cpus']} "
-                           f"--server-pid {pid} --time {chunk} --warmup 0 --get-ratio {o.get('get_ratio', 0.9)} "
-                           f"--key-dist {o.get('key_dist', 'uniform')} --quiet", shell=True, text=True, capture_output=True)
+        cmd = (f"{KVB} run {data_args(g['data'])} --threads {o['threads']} --conns {o['conns']} --cpus {o['cpus']} "
+               f"--server-pid {pid} --time {chunk} --warmup 0 --get-ratio {o.get('get_ratio', 0.9)} "
+               f"--key-dist {o.get('key_dist', 'uniform')} --quiet")
+        if o.get("rate"):
+            cmd += f" --rate {o['rate']}"
+        if o.get("pipeline"):
+            cmd += f" --pipeline {o['pipeline']}"
+        r = subprocess.run(cmd, shell=True, text=True, capture_output=True)
         try:
-            hist.append(json.loads(r.stdout)["ops_s"])
+            j = json.loads(r.stdout)
+            hist.append((j["ops_s"], j["system"].get("disk_write_mb_s", 0.0)))
         except Exception:
             log(out, f"settle chunk failed: {r.stderr[-300:]}")
             break
-        if len(hist) >= 2 and abs(hist[-1] - hist[-2]) <= pct / 100 * max(hist[-1], hist[-2]):
+        if steady():
             break
-    res = {"chunks_ops_s": [round(x) for x in hist], "seconds": round(time.time() - t0),
-           "steady": len(hist) >= 2 and abs(hist[-1] - hist[-2]) <= pct / 100 * max(hist[-1], hist[-2])}
+    res = {"chunks_ops_s": [round(x[0]) for x in hist], "chunks_disk_write_mb_s": [round(x[1], 1) for x in hist],
+           "seconds": round(time.time() - t0), "steady": steady()}
     log(out, f"settle g{gi} p{pi}: {res}")
     return res
 
 
-def run_point(out, gi, pi, g, p, dflt):
+def run_point(out, gi, pi, g, p, dflt, rnd=0):
     o = dict(dflt)
     o.update(g.get("point_defaults", {}))
     o.update(p)
+    if o.get("rate") and o.get("time_rate"):
+        o["time"] = o["time_rate"]
     settled = settle(out, gi, pi, g, o)
     label = f"{g.get('name', g['store'])}|{g['swap']}|{g['data']['keys']}|{o.get('key_dist','uniform')}|{'rate'+str(o['rate']) if o.get('rate') else 'closed'}"
     if o.get("tag"):
         label += "|" + o["tag"]
+    if o.get("pipeline"):
+        label += f"|pipe{o['pipeline']}"
+    if rnd:
+        label += f"|r{rnd}"
     pid = sh(f"{KVCTL} pid", capture=True).strip()
     args = (f"{KVB} run {data_args(g['data'])} --threads {o['threads']} --conns {o['conns']} --cpus {o['cpus']} "
             f"--server-pid {pid} --time {o['time']} --warmup {o['warmup']} --get-ratio {o.get('get_ratio', 0.9)} "
@@ -116,7 +139,7 @@ def run_point(out, gi, pi, g, p, dflt):
         summ = {"error": "no summary", "stderr": r.stderr[-4000:]}
     rec = {"type": "point", "study": out, "group": gi, "point": pi, "store": g.get("name", g["store"]), "swap": g["swap"], "env": g.get("env", {}),
            "label": label, "ts": datetime.datetime.utcnow().isoformat(timespec="seconds") + "Z",
-           "host": host_state(), "exit": r.returncode, "settle": settled, "summary": summ}
+           "host": host_state(), "exit": r.returncode, "settle": settled, "round": rnd, "summary": summ}
     with open(os.path.join(out, "results.jsonl"), "a") as f:
         f.write(json.dumps(rec) + "\n")
     last = [l for l in r.stderr.splitlines() if l.startswith("SUMMARY") or l.startswith("WARNING")]
@@ -162,11 +185,18 @@ def main():
         except Exception:
             log(out, f"LOAD FAILED exit {r.returncode}: {r.stderr[-500:]}")
             continue
-        for pi, p in enumerate(g["points"]):
-            if os.path.exists(os.path.join(out, "STOP")):
-                log(out, "STOP file found, ending")
-                return
-            run_point(out, gi, pi, g, p, dflt)
+        rounds = int(plan.get("rounds", 1))
+        for rnd in range(1, rounds + 1):
+            order = list(range(len(g["points"])))
+            if plan.get("shuffle") and rounds > 1:
+                import random
+                random.Random(f"{plan['name']}|{gi}|{rnd}").shuffle(order)
+            log(out, f"group {gi} round {rnd}: order {order}")
+            for pi in order:
+                if os.path.exists(os.path.join(out, "STOP")):
+                    log(out, "STOP file found, ending")
+                    return
+                run_point(out, gi, pi, g, g["points"][pi], dflt, rnd if rounds > 1 else 0)
         sh(f"{KVCTL} stop")
     sh(f"{KVCTL} stop")
     sh(f"{SWAPMODE} none")
