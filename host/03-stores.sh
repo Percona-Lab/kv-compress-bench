@@ -38,4 +38,13 @@ fi
 if [ ! -x /root/.cargo/bin/cargo ]; then
   curl -fsSL https://sh.rustup.rs | sh -s -- -y --profile minimal
 fi
+# TidesKV (pinned commit) and runtime deps for Garnet (.NET 10) and investigation tools
+TIDESKV_SHA=c598261c0b80efe8807669531010b0606996123a
+DEBIAN_FRONTEND=noninteractive apt-get -y -q install dotnet-runtime-10.0 elfutils ninja-build liblz4-dev libzstd-dev >/dev/null || true
+if [ ! -x /opt/tideskv/bin/tideskv-server ]; then
+  (rm -rf tideskv && git clone -q https://github.com/EvgeniyPatlan/tideskv.git && cd tideskv && git checkout -q $TIDESKV_SHA \
+   && cmake --preset release && cmake --build --preset release -j"$(nproc)" && mkdir -p /opt/tideskv/bin \
+   && cp build/release/src/tideskv-server /opt/tideskv/bin/ && git rev-parse HEAD > /opt/tideskv/REVISION)
+fi
+DEBIAN_FRONTEND=noninteractive apt-get -y -q install dotnet-runtime-10.0 elfutils ninja-build liblz4-dev libzstd-dev >/dev/null || true
 echo STORES-DONE

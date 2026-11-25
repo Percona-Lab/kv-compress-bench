@@ -1,0 +1,13 @@
+hotspot:0.1:0.9 exit 0
+SUMMARY 157474 ops/s (get 141719 set 15755)  p50 343.0 p99 828.4 p99.9 3950.6 us  client 12.27 us/op  server 37.58 us/op
+CHECK: 37395186 GETs checked against the last SET, 0 mismatches; 5120659 first reads learned (warm-up: 829008 ok, 0 mismatches)
+uniform --rate 50000 exit 0
+SUMMARY 50000 ops/s (get 45005 set 4995)  p50 57.0 p99 130.3 p99.9 156.9 us  client 23.88 us/op  server 39.53 us/op  target 50000 met=true
+CHECK: 3394629 GETs checked against the last SET, 0 mismatches; 10106791 first reads learned (warm-up: 33256 ok, 0 mismatches)
+uniform exit 0
+SUMMARY 162895 ops/s (get 146606 set 16290)  p50 353.0 p99 1492.0 p99.9 4329.5 us  client 12.24 us/op  server 35.94 us/op
+CHECK: 25875040 GETs checked against the last SET, 0 mismatches; 18106683 first reads learned (warm-up: 413620 ok, 0 mismatches)
+zipfian:0.99 exit 0
+SUMMARY 170199 ops/s (get 153180 set 17019)  p50 346.6 p99 1089.5 p99.9 3332.1 us  client 12.30 us/op  server 33.86 us/op
+CHECK: 33092964 GETs checked against the last SET, 0 mismatches; 12860897 first reads learned (warm-up: 1367131 ok, 0 mismatches)
+INVESTIGATION-DONE

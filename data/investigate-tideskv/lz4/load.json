@@ -1,0 +1,59 @@
+{
+  "client_compress": null,
+  "compressibility": {
+    "lz4_ratio": 3.763104865842564,
+    "mean_value_len": 1024.0,
+    "page_bytes": 4096,
+    "pages": 512,
+    "zstd1_ratio": 7.714144884461741,
+    "zstd3_ratio": 7.28392754806106,
+    "zstd_levels": {}
+  },
+  "data": {
+    "client_compress": "none",
+    "key_prefix": "",
+    "keys": 30000000,
+    "pool_mb": 64,
+    "seed": 1,
+    "value_random_pct": 10.0,
+    "value_size": {
+      "size": 1024,
+      "type": "fixed"
+    }
+  },
+  "dbsize": null,
+  "errors": 0,
+  "keys_loaded": 30000000,
+  "keys_per_s": 128234.94430328454,
+  "label": "",
+  "seconds": 233.945592311,
+  "server_info": {
+    "connected_clients": 2,
+    "redis_version": "7.2.0"
+  },
+  "system": {
+    "AnonPages_kb": 4092000,
+    "Cached_kb": 13914004,
+    "MemAvailable_kb": 27217760,
+    "MemFree_kb": 13648316,
+    "MemTotal_kb": 32102000,
+    "SwapFree_kb": 0,
+    "SwapTotal_kb": 0,
+    "Zswap_kb": 0,
+    "Zswapped_kb": 0,
+    "client_cpu_s": 54.419816,
+    "disk_read_mb_s": 0.14365596576542033,
+    "disk_write_mb_s": 71.06932881170694,
+    "host_cpu_busy_pct": 39.61058659879201,
+    "host_cpu_iowait_pct": 1.1701639635373722,
+    "majfault_s": 1.1669379931598893,
+    "psi_mem_full_pct": 0.0,
+    "psi_mem_some_pct": 0.0,
+    "swapin_pages_s": 0.0,
+    "swapout_pages_s": 0.0,
+    "zswap_writeback_s": 0.0,
+    "zswpin_s": 0.0,
+    "zswpout_s": 0.0
+  },
+  "type": "load_summary"
+}

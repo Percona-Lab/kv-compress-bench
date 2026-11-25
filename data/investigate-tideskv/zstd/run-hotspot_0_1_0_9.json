@@ -1,0 +1,173 @@
+{
+  "check": {
+    "fail": 0,
+    "gets_checked": 37395186,
+    "learned_first_read": 5120659,
+    "ok": 37395186,
+    "warmup_fail": 0,
+    "warmup_ok": 829008
+  },
+  "client_compress": null,
+  "compressibility": {
+    "lz4_ratio": 3.763104865842564,
+    "mean_value_len": 1024.0,
+    "page_bytes": 4096,
+    "pages": 512,
+    "zstd1_ratio": 7.714144884461741,
+    "zstd3_ratio": 7.28392754806106,
+    "zstd_levels": {}
+  },
+  "config": {
+    "arrival": "uniform",
+    "conns_per_thread": 16,
+    "cpus": "4,5,10,11",
+    "data": {
+      "client_compress": "none",
+      "key_prefix": "",
+      "keys": 30000000,
+      "pool_mb": 64,
+      "seed": 1,
+      "value_random_pct": 10.0,
+      "value_size": {
+        "size": 1024,
+        "type": "fixed"
+      }
+    },
+    "get_ratio": 0.9,
+    "interval_s": 1.0,
+    "key_dist": {
+      "hot_keys": 0.1,
+      "hot_ops": 0.9,
+      "hot_start": 0.0,
+      "type": "hotspot"
+    },
+    "label": "zstd|hotspot:0.1:0.9",
+    "max_pending": 1000,
+    "mode": "closed",
+    "pipeline": 1,
+    "scramble": false,
+    "server": "127.0.0.1:6379",
+    "server_pid": 127636,
+    "spin_us": 15.0,
+    "stream_seed": 10616567246108525687,
+    "target_rate": 0.0,
+    "threads": 4,
+    "time_s": 300.0,
+    "verify": false,
+    "warmup_s": 30.0
+  },
+  "cpu": {
+    "client_cpu_cores": 1.93166644,
+    "client_cpu_us_per_op": 12.266545481508958,
+    "client_saturated": false,
+    "server_cpu_cores": 5.9176,
+    "server_cpu_us_per_op": 37.578180185900735,
+    "server_majflt_per_op": 0.0
+  },
+  "error": null,
+  "errors": 0,
+  "final_backlog": 0,
+  "get_s": 141719.48333333334,
+  "latency": {
+    "all": {
+      "count": 47242309,
+      "max_us": 60028878.847,
+      "mean_us": 379.71912887085955,
+      "p50_us": 343.039,
+      "p90_us": 387.839,
+      "p9999_us": 6152.191,
+      "p999_us": 3950.591,
+      "p99_us": 828.415
+    },
+    "get": {
+      "count": 42515845,
+      "max_us": 60028878.847,
+      "mean_us": 378.29002161880993,
+      "p50_us": 340.735,
+      "p90_us": 385.023,
+      "p9999_us": 5992.447,
+      "p999_us": 3887.103,
+      "p99_us": 772.607
+    },
+    "note": "latency = from scheduled send time (open loop) / actual send (closed loop); service = from actual send",
+    "send_lag": {
+      "count": 0,
+      "max_us": 0.0,
+      "mean_us": 0.0,
+      "p50_us": 0.0,
+      "p90_us": 0.0,
+      "p9999_us": 0.0,
+      "p999_us": 0.0,
+      "p99_us": 0.0
+    },
+    "service_all": {
+      "count": 47242309,
+      "max_us": 60028878.847,
+      "mean_us": 379.71912887085955,
+      "p50_us": 343.039,
+      "p90_us": 387.839,
+      "p9999_us": 6152.191,
+      "p999_us": 3950.591,
+      "p99_us": 828.415
+    },
+    "set": {
+      "count": 4726464,
+      "max_us": 484442.111,
+      "mean_us": 392.5743420739061,
+      "p50_us": 360.191,
+      "p90_us": 404.479,
+      "p9999_us": 6758.399,
+      "p999_us": 4341.759,
+      "p99_us": 1296.383
+    }
+  },
+  "measured_s": 300.0,
+  "misses": 0,
+  "ops": 47242309,
+  "ops_s": 157474.36333333334,
+  "server_info_end": {
+    "connected_clients": 65,
+    "redis_version": "7.2.0"
+  },
+  "server_info_start": {
+    "connected_clients": 70,
+    "redis_version": "7.2.0"
+  },
+  "set_s": 15754.88,
+  "system": {
+    "AnonPages_kb": 9125088,
+    "Cached_kb": 10438884,
+    "MemAvailable_kb": 22197724,
+    "MemFree_kb": 12109552,
+    "MemTotal_kb": 32102000,
+    "SwapFree_kb": 0,
+    "SwapTotal_kb": 0,
+    "Zswap_kb": 0,
+    "Zswapped_kb": 0,
+    "client_cpu_s": 579.4999320000001,
+    "disk_read_mb_s": 0.00385023968540975,
+    "disk_write_mb_s": 8.849270743622252,
+    "host_cpu_busy_pct": 66.56580981279254,
+    "host_cpu_iowait_pct": 0.1399782446899739,
+    "majfault_s": 0.0099999991829334,
+    "psi_mem_full_pct": 0.0,
+    "psi_mem_some_pct": 0.0,
+    "server_cpu_s": 1775.28,
+    "server_majflt_s": 0.0,
+    "server_majflt_total": 0,
+    "server_rss_kb": 8858080,
+    "server_swap_kb": 0,
+    "swapin_pages_s": 0.0,
+    "swapout_pages_s": 0.0,
+    "zswap_writeback_s": 0.0,
+    "zswpin_s": 0.0,
+    "zswpout_s": 0.0
+  },
+  "target_rate_met": null,
+  "type": "summary",
+  "verify_fail": 0,
+  "warmup": {
+    "ops_s": 92280.7,
+    "p99_us": 3854.335
+  }
+}

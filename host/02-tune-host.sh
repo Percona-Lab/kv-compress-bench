@@ -9,7 +9,9 @@ apt-get -y install build-essential cmake pkg-config git curl jq python3 python3-
 
 # second SSD -> /data (store data files, disk swap file)
 if ! mountpoint -q /data; then
-  DEV=/dev/sdb
+  ROOTDEV=$(lsblk -no PKNAME $(findmnt -no SOURCE /) | head -1)
+  DEV=/dev/$(lsblk -dno NAME,TYPE | awk '$2=="disk"{print $1}' | grep -v "^$ROOTDEV$" | grep -v "^zram" | head -1)
+  echo "data disk: $DEV (root on $ROOTDEV)"
   if ! blkid $DEV >/dev/null 2>&1; then mkfs.xfs -f $DEV; fi
   mkdir -p /data
   UUID=$(blkid -s UUID -o value $DEV)
@@ -34,12 +36,12 @@ sysctl --system >/dev/null
 # stable clocks: performance governor, turbo off
 cat > /etc/systemd/system/kvbench-cpu.service <<'S'
 [Unit]
-Description=kvbench CPU settings (performance governor, no turbo)
+Description=kvbench CPU settings (performance governor, no turbo / boost)
 After=multi-user.target
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/bin/sh -c 'for g in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo performance > $g; done; [ -e /sys/devices/system/cpu/intel_pstate/no_turbo ] && echo 1 > /sys/devices/system/cpu/intel_pstate/no_turbo; true'
+ExecStart=/bin/sh -c 'for g in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo performance > $g; done; [ -e /sys/devices/system/cpu/intel_pstate/no_turbo ] && echo 1 > /sys/devices/system/cpu/intel_pstate/no_turbo; [ -e /sys/devices/system/cpu/cpufreq/boost ] && echo 0 > /sys/devices/system/cpu/cpufreq/boost; true'
 [Install]
 WantedBy=multi-user.target
 S

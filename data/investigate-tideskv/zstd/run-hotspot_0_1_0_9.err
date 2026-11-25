@@ -1,0 +1,2 @@
+SUMMARY 157474 ops/s (get 141719 set 15755)  p50 343.0 p99 828.4 p99.9 3950.6 us  client 12.27 us/op  server 37.58 us/op
+CHECK: 37395186 GETs checked against the last SET, 0 mismatches; 5120659 first reads learned (warm-up: 829008 ok, 0 mismatches)

@@ -1,0 +1,371 @@
+{
+ "name": "v2-epyc4245p-calib",
+ "protocol": "v2-calib",
+ "defaults": {
+  "threads": 6,
+  "conns": 12,
+  "cpus": "0,4,5,6,10,11",
+  "warmup": 15,
+  "time": 60,
+  "settle_chunk": 20,
+  "settle_max": 120
+ },
+ "groups": [
+  {
+   "name": "valkey-io2",
+   "store": "valkey-io",
+   "swap": "none",
+   "data": {
+    "keys": 5000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10
+   },
+   "env": {
+    "VALKEY_IO_THREADS": "2"
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "uniform",
+     "pipeline": 8
+    }
+   ]
+  },
+  {
+   "name": "redis-io2",
+   "store": "redis-io",
+   "swap": "none",
+   "data": {
+    "keys": 5000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10
+   },
+   "env": {
+    "REDIS_IO_THREADS": "2"
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "uniform",
+     "pipeline": 8
+    }
+   ]
+  },
+  {
+   "name": "keydb2",
+   "store": "keydb",
+   "swap": "none",
+   "data": {
+    "keys": 5000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10
+   },
+   "env": {
+    "KEYDB_THREADS": "2"
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "uniform",
+     "pipeline": 8
+    }
+   ]
+  },
+  {
+   "name": "valkey-io3",
+   "store": "valkey-io",
+   "swap": "none",
+   "data": {
+    "keys": 5000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10
+   },
+   "env": {
+    "VALKEY_IO_THREADS": "3"
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "uniform",
+     "pipeline": 8
+    }
+   ]
+  },
+  {
+   "name": "redis-io3",
+   "store": "redis-io",
+   "swap": "none",
+   "data": {
+    "keys": 5000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10
+   },
+   "env": {
+    "REDIS_IO_THREADS": "3"
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "uniform",
+     "pipeline": 8
+    }
+   ]
+  },
+  {
+   "name": "keydb3",
+   "store": "keydb",
+   "swap": "none",
+   "data": {
+    "keys": 5000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10
+   },
+   "env": {
+    "KEYDB_THREADS": "3"
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "uniform",
+     "pipeline": 8
+    }
+   ]
+  },
+  {
+   "name": "valkey-io4",
+   "store": "valkey-io",
+   "swap": "none",
+   "data": {
+    "keys": 5000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10
+   },
+   "env": {
+    "VALKEY_IO_THREADS": "4"
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "uniform",
+     "pipeline": 8
+    }
+   ]
+  },
+  {
+   "name": "redis-io4",
+   "store": "redis-io",
+   "swap": "none",
+   "data": {
+    "keys": 5000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10
+   },
+   "env": {
+    "REDIS_IO_THREADS": "4"
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "uniform",
+     "pipeline": 8
+    }
+   ]
+  },
+  {
+   "name": "keydb4",
+   "store": "keydb",
+   "swap": "none",
+   "data": {
+    "keys": 5000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10
+   },
+   "env": {
+    "KEYDB_THREADS": "4"
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "uniform",
+     "pipeline": 8
+    }
+   ]
+  },
+  {
+   "name": "valkey-io6",
+   "store": "valkey-io",
+   "swap": "none",
+   "data": {
+    "keys": 5000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10
+   },
+   "env": {
+    "VALKEY_IO_THREADS": "6"
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "uniform",
+     "pipeline": 8
+    }
+   ]
+  },
+  {
+   "name": "redis-io6",
+   "store": "redis-io",
+   "swap": "none",
+   "data": {
+    "keys": 5000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10
+   },
+   "env": {
+    "REDIS_IO_THREADS": "6"
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "uniform",
+     "pipeline": 8
+    }
+   ]
+  },
+  {
+   "name": "keydb6",
+   "store": "keydb",
+   "swap": "none",
+   "data": {
+    "keys": 5000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10
+   },
+   "env": {
+    "KEYDB_THREADS": "6"
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "uniform",
+     "pipeline": 8
+    }
+   ]
+  },
+  {
+   "name": "pika-t1-p12",
+   "store": "pika",
+   "swap": "none",
+   "data": {
+    "keys": 5000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10
+   },
+   "env": {
+    "PIKA_THREADS": "1",
+    "PIKA_POOL": "12"
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "uniform",
+     "pipeline": 8
+    }
+   ]
+  },
+  {
+   "name": "pika-t2-p6",
+   "store": "pika",
+   "swap": "none",
+   "data": {
+    "keys": 5000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10
+   },
+   "env": {
+    "PIKA_THREADS": "2",
+    "PIKA_POOL": "6"
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "uniform",
+     "pipeline": 8
+    }
+   ]
+  },
+  {
+   "name": "pika-t4-p6",
+   "store": "pika",
+   "swap": "none",
+   "data": {
+    "keys": 5000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10
+   },
+   "env": {
+    "PIKA_THREADS": "4",
+    "PIKA_POOL": "6"
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "uniform",
+     "pipeline": 8
+    }
+   ]
+  },
+  {
+   "name": "pika-t6-p12",
+   "store": "pika",
+   "swap": "none",
+   "data": {
+    "keys": 5000000,
+    "value_size": "fixed:1024",
+    "value_random_pct": 10
+   },
+   "env": {
+    "PIKA_THREADS": "6",
+    "PIKA_POOL": "12"
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "uniform",
+     "pipeline": 8
+    }
+   ]
+  }
+ ]
+}

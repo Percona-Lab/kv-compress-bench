@@ -1,0 +1,2 @@
+SUMMARY 50000 ops/s (get 45005 set 4995)  p50 57.0 p99 130.3 p99.9 156.9 us  client 23.88 us/op  server 39.53 us/op  target 50000 met=true
+CHECK: 3394629 GETs checked against the last SET, 0 mismatches; 10106791 first reads learned (warm-up: 33256 ok, 0 mismatches)
