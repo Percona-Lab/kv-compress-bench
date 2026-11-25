@@ -186,7 +186,7 @@ Disk swap at a fixed rate: latency capped at the 60 s histogram limit when the t
 The application compresses each value before SET and decompresses it after GET (`kvbench --client-compress`); Valkey stores the
 compressed bytes. Disk swap was enabled only as overflow and was never used. Same data sets and workloads as above.
 
-| Data | Mode | Valkey memory | Uniform (ops/s) | Zipfian (ops/s) | Uniform @ 50k p99 / p99.9 | Client CPU µs/op | Server CPU µs/op |
+| Data | Mode | Valkey memory after load | Uniform (ops/s) | Zipfian (ops/s) | Uniform @ 50k p99 / p99.9 | Client CPU µs/op | Server CPU µs/op |
 |---|---|---|---|---|---|---|---|
 | - | in RAM, uncompressed (15M keys) | 20.1 GB | 147.2k | 150.2k | 57 / 83 µs | 11.1 | 6.8 |
 | 40 GB | zram lz4 | 39.9 GB (11.7 GB swapped) | 107.2k | 138.5k | 99 / 205 µs | 11.5 | 9.3 |
