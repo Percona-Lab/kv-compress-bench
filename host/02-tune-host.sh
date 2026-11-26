@@ -33,6 +33,10 @@ kernel.perf_event_paranoid = -1
 S
 sysctl --system >/dev/null
 
+# the Intel RDMA driver (loaded for ice / i40e NICs) reserves ~5.6 GB of RAM; nothing here uses RDMA
+cp "$(dirname "$0")/kvbench-no-irdma.conf" /etc/modprobe.d/ && update-initramfs -u >/dev/null 2>&1 || true
+rmmod irdma 2>/dev/null || true
+
 # stable clocks: performance governor, turbo off
 cat > /etc/systemd/system/kvbench-cpu.service <<'S'
 [Unit]
