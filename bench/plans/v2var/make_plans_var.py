@@ -7,7 +7,7 @@ sys.path.insert(0, __import__("os").path.dirname(__file__) + "/../v2")
 host, ccpus, th, bpk, outdir = sys.argv[1], sys.argv[2], json.loads(sys.argv[3]), float(sys.argv[4]), sys.argv[5]
 VS = "lognormal:700:0.8:32:8192"
 # Valkey used_memory right after loading the fixed 1 KiB v2 data sets
-TARGET = {"20g": 20.12e9, "40g": 40.25e9, "64g": 63.63e9}
+TARGET = {"20g": 20.12e9, "40g": 38.0e9, "64g": 63.63e9}  # middle size 38 GB on the new host (0.7 GB less RAM)
 V = {"value_size": VS, "value_random_pct": 10}
 STD = [{"key_dist": "uniform"}, {"key_dist": "zipfian:0.99"}, {"key_dist": "hotspot:0.1:0.9"}, {"key_dist": "normal:0.5:0.05"},
        {"key_dist": "uniform", "rate": 50000}, {"key_dist": "zipfian:0.99", "rate": 50000}]
