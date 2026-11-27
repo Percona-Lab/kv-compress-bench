@@ -21,8 +21,16 @@ show() {
 
 # reset
 swapoff -a 2>/dev/null || true
-if [ -e /dev/zram0 ]; then swapoff /dev/zram0 2>/dev/null || true; echo 1 > /sys/block/zram0/reset; fi
-rmmod zram 2>/dev/null || true   # fresh module: no algorithm_params (zstd level) carried over between modes
+if [ -e /dev/zram0 ]; then
+  # the device can stay busy for a while after a large swapoff / process exit: retry instead of failing
+  for i in $(seq 1 120); do
+    swapoff /dev/zram0 2>/dev/null || true
+    echo 1 > /sys/block/zram0/reset 2>/dev/null && break
+    sleep 1
+  done
+  [ $i -lt 120 ] || { echo "zram0 still busy after 120 s" >&2; exit 1; }
+fi
+for i in $(seq 1 30); do rmmod zram 2>/dev/null && break; [ -e /sys/module/zram ] || break; sleep 1; done   # fresh module: no algorithm_params (zstd level) carried over between modes
 echo N > /sys/module/zswap/parameters/enabled
 if [ "$base" = disk ] || [ "$base" = none ]; then
   sysctl -q vm.page-cluster=3 vm.watermark_boost_factor=15000 vm.watermark_scale_factor=10
