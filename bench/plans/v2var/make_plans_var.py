@@ -60,7 +60,7 @@ for t in ("40g", "64g"):
         grp("garnet-tiered", "garnet", n, env={"GARNET_OPTS": "--storage-tier --logdir /data/garnet/log"}, slow=True),
     ]
 for t, groups in plans.items():
-    p = {"name": f"v2var-{host}-{t}", "protocol": "v2", "value_size": VS, "bytes_per_key": bpk, "rounds": 2, "shuffle": True,
+    p = {"name": f"v2var-{host}-{t}", "protocol": "v2", "value_size": VS, "bytes_per_key": bpk, "rounds": 2, "shuffle": True, "final_check": True, "check_time": 120,
          "defaults": DEF, "groups": groups, "threads_chosen": th}
     json.dump(p, open(f"{outdir}/v2var-{host}-{t}.json", "w"), indent=1)
     print(p["name"], len(groups), "groups,", k[t], "keys")

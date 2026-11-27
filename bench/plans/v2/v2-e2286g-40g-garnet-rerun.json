@@ -62,5 +62,7 @@
   "keydb": 4,
   "pika_threads": 4,
   "pika_pool": 6
- }
+ },
+ "final_check": true,
+ "check_time": 120
 }

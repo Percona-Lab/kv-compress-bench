@@ -146,6 +146,31 @@ def run_point(out, gi, pi, g, p, dflt, rnd=0):
     log(out, " | ".join(last) if last else f"exit {r.returncode}: {r.stderr[-300:]}")
 
 
+def run_check(out, gi, g, dflt, plan):
+    """Correctness point after the timed rounds (not a performance result): uniform access at full load with
+    kvbench --check, so every GET must return the version of the last SET sent for that key."""
+    o = dict(dflt)
+    o.update(g.get("point_defaults", {}))
+    secs = int(plan.get("check_time", 120))
+    pid = sh(f"{KVCTL} pid", capture=True).strip()
+    label = f"{g.get('name', g['store'])}|{g['swap']}|{g['data']['keys']}|uniform|closed|check"
+    log(out, f"check g{gi}: {label}")
+    args = (f"{KVB} run {data_args(g['data'])} --threads {o['threads']} --conns {o['conns']} --cpus {o['cpus']} "
+            f"--server-pid {pid} --time {secs} --warmup 10 --key-dist uniform --check --label '{label}' --quiet")
+    r = subprocess.run(args, shell=True, text=True, capture_output=True)
+    try:
+        summ = json.loads(r.stdout)
+    except json.JSONDecodeError:
+        summ = {"error": "no summary", "stderr": r.stderr[-4000:]}
+    rec = {"type": "check", "kind": "check", "study": out, "group": gi, "store": g.get("name", g["store"]), "swap": g["swap"],
+           "label": label, "ts": datetime.datetime.utcnow().isoformat(timespec="seconds") + "Z", "exit": r.returncode,
+           "check": summ.get("check"), "errors": summ.get("errors"), "verify_fail": summ.get("verify_fail"), "summary": summ}
+    with open(os.path.join(out, "checks.jsonl"), "a") as f:
+        f.write(json.dumps(rec) + "\n")
+    line = [l for l in r.stderr.splitlines() if l.startswith("CHECK")]
+    log(out, (line[0] if line else f"CHECK exit {r.returncode}: {r.stderr[-300:]}") + f" (exit {r.returncode})")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("plan")
@@ -197,6 +222,8 @@ def main():
                     log(out, "STOP file found, ending")
                     return
                 run_point(out, gi, pi, g, g["points"][pi], dflt, rnd if rounds > 1 else 0)
+        if plan.get("final_check"):
+            run_check(out, gi, g, dflt, plan)
         sh(f"{KVCTL} stop")
     sh(f"{KVCTL} stop")
     sh(f"{SWAPMODE} none")
