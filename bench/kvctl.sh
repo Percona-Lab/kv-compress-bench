@@ -71,6 +71,7 @@ case $cmd in
       garnet)
         # non-defaults: GARNET_OPTS, e.g. "-m 24g" (in RAM) or "--storage-tier --logdir /data/garnet" (tiered to SSD)
         mkdir -p /data/garnet
+        bash "$(dirname "$0")/../host/garnet-native.sh" "$GARNET"   # native tiered-storage device libraries
         unit_run -p WorkingDirectory=/data/garnet $GARNET --bind 127.0.0.1 --port 6379 ${GARNET_OPTS:-} ;;
       pika)
         # shipped pika.conf with port/paths changed and thread settings from PIKA_THREADS / PIKA_POOL
