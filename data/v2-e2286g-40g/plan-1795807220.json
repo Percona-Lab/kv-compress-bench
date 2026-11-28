@@ -1,0 +1,68 @@
+{
+ "name": "v2-e2286g-40g",
+ "protocol": "v2",
+ "rounds": 2,
+ "shuffle": true,
+ "defaults": {
+  "threads": 6,
+  "conns": 12,
+  "cpus": "0,4,5,6,10,11",
+  "warmup": 30,
+  "time": 120,
+  "time_rate": 300,
+  "settle_chunk": 30,
+  "settle_pct": 2.0,
+  "settle_disk_pct": 25.0,
+  "settle_disk_mb": 5.0,
+  "settle_max": 600
+ },
+ "groups": [
+  {
+   "name": "garnet-tiered",
+   "store": "garnet",
+   "swap": "none",
+   "data": {
+    "value_size": "fixed:1024",
+    "value_random_pct": 10,
+    "keys": 30000000
+   },
+   "points": [
+    {
+     "key_dist": "uniform"
+    },
+    {
+     "key_dist": "zipfian:0.99"
+    },
+    {
+     "key_dist": "hotspot:0.1:0.9"
+    },
+    {
+     "key_dist": "normal:0.5:0.05"
+    },
+    {
+     "key_dist": "uniform",
+     "rate": 50000
+    },
+    {
+     "key_dist": "zipfian:0.99",
+     "rate": 50000
+    }
+   ],
+   "env": {
+    "GARNET_OPTS": "--storage-tier --logdir /data/garnet/log"
+   },
+   "point_defaults": {
+    "settle_max": 1800
+   }
+  }
+ ],
+ "threads_chosen": {
+  "valkey_io": 6,
+  "redis_io": 6,
+  "keydb": 4,
+  "pika_threads": 4,
+  "pika_pool": 6
+ },
+ "final_check": true,
+ "check_time": 120
+}
